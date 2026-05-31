@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block title %}Kártya import | Learning Portal{% endblock %}
+
+{% block content %}
+
+<div class="mb-4">
+    <h1 class="h3 mb-1">Kártyák importálása</h1>
+    <p class="text-muted mb-0">
+        CSV fájlból tudsz szókártyákat betölteni egy kiválasztott pakliba.
+    </p>
+</div>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <h2 class="h5 card-title">CSV import</h2>
+
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <div class="mb-3">
+                <label for="{{ form.deck.id_for_label }}" class="form-label">Pakli</label>
+                {{ form.deck }}
+            </div>
+
+            <div class="mb-3">
+                <label for="{{ form.csv_file.id_for_label }}" class="form-label">CSV fájl</label>
+                {{ form.csv_file }}
+                <div class="form-text">
+                    Támogatott elválasztó: pontosvessző vagy vessző.
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary">
+                Importálás
+            </button>
+        </form>
+    </div>
+</div>
+
+{% if result %}
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <h2 class="h5 card-title">Import eredmény</h2>
+
+            <p class="mb-1">
+                Importált kártyák: <strong>{{ result.imported_count }}</strong>
+            </p>
+
+            <p class="mb-1">
+                Kihagyott sorok / duplikációk: <strong>{{ result.skipped_count }}</strong>
+            </p>
+
+            {% if result.error_rows %}
+                <div class="alert alert-warning mt-3 mb-0">
+                    <div class="fw-semibold mb-2">Figyelmeztetések:</div>
+                    <ul class="mb-0">
+                        {% for error in result.error_rows %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+{% endif %}
+
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <h2 class="h5 card-title">Elvárt CSV formátum</h2>
+
+        <p class="text-muted">
+            Egyszerű pontosvesszős formátum javasolt:
+        </p>
+
+        <pre class="bg-light p-3 rounded small mb-0">source_text;target_text;card_type;example_sentence;note
+család;die Familie, -n;word;;
+apa;der Vater, -;word;;
+anya;die Mutter, -;word;;
+ház;das Haus, -er;word;;
+lakás;die Wohnung, -en;word;;</pre>
+    </div>
+</div>
+
+<div class="mt-4">
+    <a href="{% url 'vocabulary:home' %}" class="btn btn-outline-primary">
+        Vissza a nyelvtanuláshoz
+    </a>
+</div>
+
+{% endblock %}

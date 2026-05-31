@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}Kezdőlap | Learning Portal{% endblock %}
+
+{% block content %}
+
+<div class="mb-4">
+    <h1 class="h3 mb-1">Szia, {{ request.user.username }}!</h1>
+    <p class="text-muted mb-0">
+        Válassz alkalmazást a napi rutin indításához.
+    </p>
+</div>
+
+<div class="row g-3">
+
+    <div class="col-12 col-md-6">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <h2 class="h5 card-title">Nyelvtanulás</h2>
+                <p class="card-text text-muted">
+                    Szókártyák, később mondatkártyák, gyakorlási irány és statisztika.
+                </p>
+                <a href="{% url 'vocabulary:home' %}" class="btn btn-primary">
+                    Megnyitás
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-6">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <h2 class="h5 card-title">Edzés</h2>
+                <p class="card-text text-muted">
+                    A korábbi kondizós alkalmazás későbbi integrációs helye.
+                </p>
+                <a href="#" class="btn btn-outline-primary disabled">
+                    Hamarosan
+                </a>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

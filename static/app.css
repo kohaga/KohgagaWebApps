@@ -1,0 +1,36 @@
+:root {
+    --app-bg: #f5f7fb;
+    --app-card-radius: 1rem;
+}
+
+body {
+    background: var(--app-bg);
+}
+
+.navbar-brand {
+    letter-spacing: 0.02em;
+}
+
+main.container {
+    max-width: 960px;
+}
+
+.card {
+    border: 0;
+    border-radius: var(--app-card-radius);
+}
+
+.btn {
+    border-radius: 0.75rem;
+}
+
+.form-control {
+    border-radius: 0.75rem;
+}
+
+@media (max-width: 576px) {
+    main.container {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+}

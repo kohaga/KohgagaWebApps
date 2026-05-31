@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+
+{% block title %}Gyakorlás | Learning Portal{% endblock %}
+
+{% block content %}
+
+{% if session_finished %}
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <h1 class="h4">Gyakorlás vége</h1>
+
+            <p class="mb-2">
+                Első kör kérdései:
+                <strong>{{ first_round_total }}</strong>
+            </p>
+
+            <p class="mb-2">
+                Első körben helyes:
+                <strong>{{ first_round_correct }}</strong>
+            </p>
+
+            <p class="mb-0">
+                Első körben hibás:
+                <strong>{{ first_round_wrong }}</strong>
+            </p>
+
+            <p class="mb-2 mt-3">
+                Mentett eredmény:
+                <strong>{{ accuracy_percent }}%</strong>
+            </p>
+
+            {% if result_saved %}
+                <div class="alert alert-success mt-3 mb-0">
+                    Az összesített gyakorlási eredmény mentve.
+                </div>
+            {% endif %}
+
+        </div>
+    </div>
+
+    <div class="mt-4 d-flex flex-column flex-sm-row gap-2">
+        <a href="{% url 'vocabulary:practice_start' deck.id %}" class="btn btn-primary">
+            Új gyakorlás
+        </a>
+
+        <a href="{% url 'vocabulary:deck_detail' deck.id %}" class="btn btn-outline-secondary">
+            Vissza a paklihoz
+        </a>
+    </div>
+{% else %}
+
+    <div class="mb-4">
+        <h1 class="h3 mb-1">Gyakorlás</h1>
+        <p class="text-muted mb-0">
+            Pakli: {{ deck.name }}
+        </p>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div class="text-muted small">
+                    {{ question_language }} → {{ answer_language }}
+                </div>
+
+                <div class="text-muted small">
+                    {% if phase == "first_round" %}
+                        {{ progress_current }} / {{ progress_total }}
+                    {% else %}
+                        Ismétlés · hátralévő: {{ repeat_remaining_count }}
+                    {% endif %}
+                </div>
+            </div>
+
+            {% if phase == "repeat_round" %}
+                <div class="alert alert-warning py-2">
+                    Hibás kérdések ismétlése.
+                </div>
+            {% endif %}
+
+            <h2 class="display-6 mb-4">
+                {{ question_text }}
+            </h2>
+
+            {% if result_checked %}
+                {% if is_correct %}
+                    <div class="alert alert-success">
+                        Helyes válasz.
+                    </div>
+                {% else %}
+                    <div class="alert alert-danger">
+                        Nem talált. A helyes válasz:
+                        <strong>{{ correct_answer }}</strong>
+                    </div>
+                {% endif %}
+            {% endif %}
+
+            <form method="post">
+                {% csrf_token %}
+
+                <input type="hidden" name="question_card_id" value="{{ question_card.id }}">
+
+                {% for option in answer_options %}
+                    <input type="hidden" name="answer_options" value="{{ option }}">
+                {% endfor %}
+
+                <div class="d-grid gap-3">
+                    {% for option in answer_options %}
+                        {% if result_checked %}
+                            {% if option == correct_answer %}
+                                <button type="button" class="btn btn-success btn-lg text-start" disabled>
+                                    {{ option }}
+                                </button>
+                            {% elif option == selected_answer %}
+                                <button type="button" class="btn btn-danger btn-lg text-start" disabled>
+                                    {{ option }}
+                                </button>
+                            {% else %}
+                                <button type="button" class="btn btn-outline-secondary btn-lg text-start" disabled>
+                                    {{ option }}
+                                </button>
+                            {% endif %}
+                        {% else %}
+                            <button
+                                type="submit"
+                                name="selected_answer"
+                                value="{{ option }}"
+                                class="btn btn-outline-primary btn-lg text-start"
+                            >
+                                {{ option }}
+                            </button>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="d-flex flex-column flex-sm-row gap-2">
+        <a href="{% url 'vocabulary:practice_start' deck.id %}" class="btn btn-outline-secondary">
+            Gyakorlás újrakezdése
+        </a>
+
+        {% if result_checked %}
+            <a href="{% url 'vocabulary:practice_session_question' deck.id %}" class="btn btn-primary">
+                Következő kérdés
+            </a>
+        {% endif %}
+    </div>
+
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+
+{% block title %}{{ deck.name }} | Learning Portal{% endblock %}
+
+{% block content %}
+
+<div class="mb-4">
+    <h1 class="h3 mb-1">{{ deck.name }}</h1>
+    <p class="text-muted mb-0">
+        {{ deck.source_language }} → {{ deck.target_language }}
+    </p>
+
+    {% if deck.description %}
+        <p class="mt-2 mb-0">{{ deck.description }}</p>
+    {% endif %}
+</div>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <h2 class="h5 card-title">Pakli állapota</h2>
+
+        <p class="mb-2">
+            Aktív kártyák száma: <strong>{{ card_count }}</strong>
+        </p>
+
+        {% if can_practice %}
+            <div class="alert alert-success mb-0">
+                Ez a pakli készen áll a gyakorlásra.
+            </div>
+        {% else %}
+            <div class="alert alert-warning mb-0">
+                A gyakorláshoz legalább 3 aktív kártya szükséges.
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <h2 class="h5 card-title">Gyakorlási statisztika</h2>
+
+        {% if session_count > 0 %}
+            <div class="row g-3">
+                <div class="col-6 col-md-3">
+                    <div class="text-muted small">Gyakorlások száma</div>
+                    <div class="h4 mb-0">{{ session_count }}</div>
+                </div>
+
+                <div class="col-6 col-md-3">
+                    <div class="text-muted small">Átlagos eredmény</div>
+                    <div class="h4 mb-0">{{ average_accuracy_percent }}%</div>
+                </div>
+
+                <div class="col-6 col-md-3">
+                    <div class="text-muted small">Legutóbbi eredmény</div>
+                    <div class="h4 mb-0">{{ last_session_result.accuracy_percent }}%</div>
+                </div>
+
+                <div class="col-6 col-md-3">
+                    <div class="text-muted small">Utolsó gyakorlás</div>
+                    <div class="fw-semibold">
+                        {{ last_session_result.created_at|date:"Y.m.d H:i" }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-3 text-muted small">
+                Legutóbbi gyakorlás:
+                {{ last_session_result.first_round_correct_count }}
+                /
+                {{ last_session_result.first_round_question_count }}
+                helyes első körben.
+            </div>
+        {% else %}
+            <p class="text-muted mb-0">
+                Ehhez a paklihoz még nincs mentett gyakorlási eredmény.
+            </p>
+        {% endif %}
+    </div>
+</div>
+
+<div class="mb-4 d-flex flex-column flex-sm-row gap-2">
+    <a href="{% url 'vocabulary:home' %}" class="btn btn-outline-secondary">
+        Vissza a paklikhoz
+    </a>
+
+    {% if can_practice %}
+        <a href="{% url 'vocabulary:practice_start' deck.id %}" class="btn btn-primary">
+            Gyakorlás indítása
+        </a>
+    {% endif %}
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center gap-3">
+            <div>
+                <h2 class="h5 card-title mb-1">Kártyák</h2>
+                <p class="text-muted small mb-0">
+                    {{ card_count }} aktív kártya ebben a pakliban.
+                </p>
+            </div>
+
+            <button
+                class="btn btn-outline-primary btn-sm"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#cardsCollapse"
+                aria-expanded="false"
+                aria-controls="cardsCollapse"
+            >
+                Lista megnyitása
+            </button>
+        </div>
+
+        <div class="collapse mt-3" id="cardsCollapse">
+            {% if cards %}
+                <div class="list-group list-group-flush">
+                    {% for card in cards %}
+                        <div class="list-group-item px-0">
+                            <div class="fw-semibold">
+                                {{ card.source_text }} → {{ card.target_text }}
+                            </div>
+                            <div class="text-muted small">
+                                Típus: {{ card.get_card_type_display }}
+                            </div>
+                            {% if card.example_sentence %}
+                                <div class="small mt-1">
+                                    Példa: {{ card.example_sentence }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-muted mb-0">
+                    Ebben a pakliban még nincs aktív kártya.
+                </p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% endblock %}

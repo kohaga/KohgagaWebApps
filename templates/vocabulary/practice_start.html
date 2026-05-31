@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+
+{% block title %}Gyakorlás indítása | Learning Portal{% endblock %}
+
+{% block content %}
+
+<div class="mb-4">
+    <h1 class="h3 mb-1">Gyakorlás indítása</h1>
+    <p class="text-muted mb-0">
+        Pakli: {{ deck.name }}
+    </p>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <h2 class="h5 card-title">Gyakorlás beállítása</h2>
+
+        <p class="mb-2">
+            Aktív kártyák száma: <strong>{{ card_count }}</strong>
+        </p>
+
+        {% if error_message %}
+            <div class="alert alert-danger">
+                {{ error_message }}
+            </div>
+        {% endif %}
+
+        {% if can_practice %}
+            <form method="post" action="{% url 'vocabulary:practice_setup' deck.id %}">
+                {% csrf_token %}
+
+                <div class="mb-4">
+                    <label class="form-label fw-semibold">Gyakorlási irány</label>
+
+                    <div class="d-grid gap-2">
+                        <input
+                            type="radio"
+                            class="btn-check"
+                            name="direction"
+                            id="direction-source-target"
+                            value="source-to-target"
+                            checked
+                        >
+                        <label class="btn btn-outline-primary text-start" for="direction-source-target">
+                            {{ deck.source_language }} → {{ deck.target_language }}
+                        </label>
+
+                        <input
+                            type="radio"
+                            class="btn-check"
+                            name="direction"
+                            id="direction-target-source"
+                            value="target-to-source"
+                        >
+                        <label class="btn btn-outline-primary text-start" for="direction-target-source">
+                            {{ deck.target_language }} → {{ deck.source_language }}
+                        </label>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-semibold">Kérdések száma</label>
+
+                    <div class="d-grid gap-2">
+                        <input
+                            type="radio"
+                            class="btn-check"
+                            name="question_count"
+                            id="count-10"
+                            value="10"
+                            checked
+                        >
+                        <label class="btn btn-outline-primary text-start" for="count-10">
+                            10 kártya
+                        </label>
+
+                        <input
+                            type="radio"
+                            class="btn-check"
+                            name="question_count"
+                            id="count-20"
+                            value="20"
+                        >
+                        <label class="btn btn-outline-primary text-start" for="count-20">
+                            20 kártya
+                        </label>
+
+                        <input
+                            type="radio"
+                            class="btn-check"
+                            name="question_count"
+                            id="count-50"
+                            value="50"
+                        >
+                        <label class="btn btn-outline-primary text-start" for="count-50">
+                            50 kártya
+                        </label>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-lg w-100">
+                    Gyakorlás előkészítése
+                </button>
+            </form>
+        {% else %}
+            <div class="alert alert-warning mb-0">
+                A gyakorláshoz legalább 3 aktív kártya szükséges, mert 1 helyes és 2 rossz válaszopciót jelenítünk meg.
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="mt-4">
+    <a href="{% url 'vocabulary:deck_detail' deck.id %}" class="btn btn-outline-secondary">
+        Vissza a paklihoz
+    </a>
+</div>
+
+{% endblock %}
