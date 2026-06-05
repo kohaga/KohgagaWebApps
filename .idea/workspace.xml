@@ -2,18 +2,16 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="040faf6f-1ff8-430c-a680-f487e0a2c2a4" name="Changes" comment="Settings to deploy">
-      <change afterPath="$PROJECT_DIR$/templates/workouts/exercise_detail.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/workouts/exercise_list.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/workouts/rest.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/workouts/train_exercise.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/workouts/workout_exercise_result.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/workouts/workout_session_detail.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/workouts/services.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/workouts/urls.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/workouts/workout_history.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/config/settings.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/config/urls.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/templates/base.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/base.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/workouts/exercise_list.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/workouts/exercise_list.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/workouts/workout_session_detail.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/workouts/workout_session_detail.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/workouts/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/workouts/admin.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/workouts/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/workouts/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/workouts/services.py" beforeDir="false" afterPath="$PROJECT_DIR$/workouts/services.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/workouts/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/workouts/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/workouts/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/workouts/views.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

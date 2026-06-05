@@ -13,7 +13,7 @@ from .models import (
     WorkoutSessionExercise,
     WorkoutSetResult,
 )
-from .services import generate_workout_for_user
+from .services import generate_workout_for_user, get_workout_profile_choices
 
 
 @login_required
@@ -33,6 +33,7 @@ def exercise_list(request):
         "workouts/exercise_list.html",
         {
             "exercises": exercises,
+            "workout_profiles": get_workout_profile_choices(),
         },
     )
 
@@ -56,6 +57,49 @@ def exercise_detail(request, exercise_id):
         },
     )
 
+@login_required
+def workout_history(request):
+    sessions = list(
+        WorkoutSession.objects
+        .filter(user=request.user)
+        .prefetch_related(
+            "session_exercises",
+            "session_exercises__set_results",
+        )
+        .order_by("-created_at")
+    )
+
+    session_rows = []
+
+    for session in sessions:
+        total_steps = _count_total_workout_steps(session)
+        completed_steps = _count_completed_workout_steps(session)
+
+        progress_percent = 0
+        if total_steps:
+            progress_percent = int((completed_steps / total_steps) * 100)
+
+        actual_duration_minutes = None
+        if session.actual_duration_seconds:
+            actual_duration_minutes = round(session.actual_duration_seconds / 60)
+
+        session_rows.append(
+            {
+                "session": session,
+                "total_steps": total_steps,
+                "completed_steps": completed_steps,
+                "progress_percent": progress_percent,
+                "actual_duration_minutes": actual_duration_minutes,
+            }
+        )
+
+    return render(
+        request,
+        "workouts/workout_history.html",
+        {
+            "session_rows": session_rows,
+        },
+    )
 
 @login_required
 def generate_workout(request):
@@ -85,10 +129,17 @@ def generate_workout(request):
             session_id=open_session.id,
         )
 
+    workout_profile = request.POST.get("workout_profile", "full_body")
+    circuit_rounds = request.POST.get("circuit_rounds", 3)
+    circuit_exercise_count = request.POST.get("circuit_exercise_count", 3)
+
     try:
         session = generate_workout_for_user(
             user=request.user,
             planned_duration_minutes=45,
+            workout_profile=workout_profile,
+            circuit_rounds=circuit_rounds,
+            circuit_exercise_count=circuit_exercise_count,
         )
     except ValueError as error:
         messages.error(request, str(error))
@@ -101,21 +152,64 @@ def generate_workout(request):
 @login_required
 def workout_session_detail(request, session_id):
     session = get_object_or_404(
-        WorkoutSession.objects.prefetch_related(
-            "session_exercises__exercise",
-            "session_exercises__exercise__equipment",
-            "session_exercises__exercise__exercise_muscles__muscle_group",
-            "session_exercises__set_results",
-        ),
+        WorkoutSession,
         id=session_id,
         user=request.user,
     )
+
+    session_exercises = list(
+        session.session_exercises
+        .select_related("exercise")
+        .prefetch_related(
+            "exercise__equipment",
+            "exercise__exercise_muscles__muscle_group",
+            "set_results",
+        )
+        .order_by("position")
+    )
+
+    warmup_items = [
+        item for item in session_exercises
+        if item.block_type == WorkoutSessionExercise.BlockType.WARMUP
+    ]
+
+    circuit_items = [
+        item for item in session_exercises
+        if item.block_type == WorkoutSessionExercise.BlockType.CIRCUIT
+    ]
+
+    cooldown_items = [
+        item for item in session_exercises
+        if item.block_type == WorkoutSessionExercise.BlockType.COOLDOWN
+    ]
+
+    warmup_rows = _build_summary_rows(warmup_items)
+    circuit_rows = _build_summary_rows(circuit_items)
+    cooldown_rows = _build_summary_rows(cooldown_items)
+
+    total_steps = _count_total_workout_steps(session)
+    completed_steps = _count_completed_workout_steps(session)
+
+    progress_percent = 0
+    if total_steps:
+        progress_percent = int((completed_steps / total_steps) * 100)
+
+    circuit_rounds = 0
+    if circuit_items:
+        circuit_rounds = max(item.target_sets for item in circuit_items)
 
     return render(
         request,
         "workouts/workout_session_detail.html",
         {
             "session": session,
+            "warmup_rows": warmup_rows,
+            "circuit_rows": circuit_rows,
+            "cooldown_rows": cooldown_rows,
+            "total_steps": total_steps,
+            "completed_steps": completed_steps,
+            "progress_percent": progress_percent,
+            "circuit_rounds": circuit_rounds,
         },
     )
 
@@ -381,6 +475,33 @@ def workout_rest(request, session_id):
         },
     )
 
+def _build_summary_rows(session_exercises):
+    rows = []
+
+    for item in session_exercises:
+        results_by_round = {
+            result.set_number: result
+            for result in item.set_results.all()
+        }
+
+        round_rows = []
+
+        for round_number in range(1, item.target_sets + 1):
+            round_rows.append(
+                {
+                    "round_number": round_number,
+                    "result": results_by_round.get(round_number),
+                }
+            )
+
+        rows.append(
+            {
+                "item": item,
+                "round_rows": round_rows,
+            }
+        )
+
+    return rows
 
 def _has_any_set_data(request, target_sets):
     for set_number in range(1, target_sets + 1):

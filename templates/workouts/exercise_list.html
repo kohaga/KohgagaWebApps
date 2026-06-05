@@ -15,12 +15,54 @@
         </div>
     </div>
 
-    <form method="post" action="{% url 'workouts:generate_workout' %}" class="mb-4">
-        {% csrf_token %}
-        <button type="submit" class="btn btn-success btn-lg w-100">
-            Mai edzés generálása
-        </button>
-    </form>
+<div class="card mb-4">
+    <div class="card-body">
+        <h5 class="card-title">Mai edzés generálása</h5>
+
+        <form method="post" action="{% url 'workouts:generate_workout' %}">
+            {% csrf_token %}
+
+            <div class="mb-3">
+                <label class="form-label">Edzés típusa</label>
+                <select name="workout_profile" class="form-select">
+                    {% for profile in workout_profiles %}
+                        <option value="{{ profile.value }}">
+                            {{ profile.label }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="row g-2">
+                <div class="col-6">
+                    <label class="form-label">Körök száma</label>
+                    <select name="circuit_rounds" class="form-select">
+                        <option value="2">2 kör</option>
+                        <option value="3" selected>3 kör</option>
+                        <option value="4">4 kör</option>
+                    </select>
+                </div>
+
+                <div class="col-6">
+                    <label class="form-label">Gyakorlatok száma</label>
+                    <select name="circuit_exercise_count" class="form-select">
+                        <option value="3" selected>3 gyakorlat</option>
+                        <option value="4">4 gyakorlat</option>
+                        <option value="5">5 gyakorlat</option>
+                    </select>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-success btn-lg w-100 mt-3">
+                Edzés generálása
+            </button>
+        </form>
+
+        <a href="{% url 'workouts:workout_history' %}" class="btn btn-outline-primary w-100 mt-2">
+            Edzéstörténet
+        </a>
+    </div>
+</div>
 
     {% if exercises %}
         <div class="row">

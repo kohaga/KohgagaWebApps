@@ -235,6 +235,19 @@ class WorkoutSession(models.Model):
         default=GenerationType.GENERATED,
     )
 
+    workout_profile = models.CharField(
+        max_length=50,
+        blank=True,
+    )
+
+    circuit_rounds = models.PositiveSmallIntegerField(
+        default=3,
+    )
+
+    circuit_exercise_count = models.PositiveSmallIntegerField(
+        default=3,
+    )
+
     created_at = models.DateTimeField(auto_now_add=True)
     started_at = models.DateTimeField(null=True, blank=True)
     finished_at = models.DateTimeField(null=True, blank=True)
