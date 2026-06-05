@@ -426,6 +426,432 @@ class Command(BaseCommand):
                     ("Törzs", ExerciseMuscle.MuscleRole.PRIMARY),
                 ],
             },
+
+            {
+                "name": "Kézisúlyzós vállból nyomás",
+                "aliases": ["Dumbbell shoulder press"],
+                "description": (
+                    "Ülj vagy állj egyenes törzzsel, mindkét kézben kézisúlyzóval vállmagasságban. "
+                    "Nyomd a súlyokat fej fölé, majd kontrolláltan engedd vissza vállmagasságba."
+                ),
+                "coaching_cues": (
+                    "Ne homoríts túl a derekaddal. "
+                    "A mozgás legyen kontrollált, ne lendületből dolgozz. "
+                    "A könyök ne essen túl mélyre, ha kellemetlen a válladnak."
+                ),
+                "movement_pattern": Exercise.MovementPattern.PUSH,
+                "difficulty": Exercise.Difficulty.BEGINNER,
+                "default_sets": 3,
+                "default_reps_min": 8,
+                "default_reps_max": 12,
+                "default_rest_seconds": 60,
+                "is_bodyweight": False,
+                "is_unilateral": False,
+                "equipment": ["Állítható kézisúlyzó"],
+                "muscles": [
+                    ("Váll", ExerciseMuscle.MuscleRole.PRIMARY),
+                    ("Tricepsz", ExerciseMuscle.MuscleRole.SECONDARY),
+                    ("Törzs", ExerciseMuscle.MuscleRole.STABILIZER),
+                ],
+            },
+            {
+                "name": "Kézisúlyzós oldalemelés",
+                "aliases": ["Dumbbell lateral raise"],
+                "description": (
+                    "Állj egyenesen, mindkét kézben kézisúlyzóval. "
+                    "Emeld oldalra a karokat körülbelül vállmagasságig, majd lassan engedd vissza."
+                ),
+                "coaching_cues": (
+                    "Ne lendítsd a súlyt. "
+                    "Enyhén hajlított könyökkel dolgozz. "
+                    "Kisebb súllyal szebb lesz a mozgás, és kevésbé sérti meg az egódat."
+                ),
+                "movement_pattern": Exercise.MovementPattern.PUSH,
+                "difficulty": Exercise.Difficulty.BEGINNER,
+                "default_sets": 3,
+                "default_reps_min": 10,
+                "default_reps_max": 15,
+                "default_rest_seconds": 45,
+                "is_bodyweight": False,
+                "is_unilateral": False,
+                "equipment": ["Állítható kézisúlyzó"],
+                "muscles": [
+                    ("Váll", ExerciseMuscle.MuscleRole.PRIMARY),
+                ],
+            },
+            {
+                "name": "Fekvőtámasz",
+                "aliases": ["Push-up"],
+                "description": (
+                    "Helyezkedj fekvőtámasz pozícióba. "
+                    "Engedd le a mellkast kontrolláltan a talaj felé, majd nyomd vissza magad kiinduló helyzetbe."
+                ),
+                "coaching_cues": (
+                    "A törzs maradjon feszes. "
+                    "Ne essen be a csípőd. "
+                    "Ha nehéz, kezdheted magasított kéztámasszal, például padon."
+                ),
+                "movement_pattern": Exercise.MovementPattern.PUSH,
+                "difficulty": Exercise.Difficulty.BEGINNER,
+                "default_sets": 3,
+                "default_reps_min": 8,
+                "default_reps_max": 15,
+                "default_rest_seconds": 60,
+                "is_bodyweight": True,
+                "is_unilateral": False,
+                "equipment": ["Saját testsúly"],
+                "muscles": [
+                    ("Mell", ExerciseMuscle.MuscleRole.PRIMARY),
+                    ("Tricepsz", ExerciseMuscle.MuscleRole.SECONDARY),
+                    ("Váll", ExerciseMuscle.MuscleRole.SECONDARY),
+                    ("Törzs", ExerciseMuscle.MuscleRole.STABILIZER),
+                ],
+            },
+            {
+                "name": "Bolgár guggolás",
+                "aliases": ["Bulgarian split squat"],
+                "description": (
+                    "Az egyik lábad legyen hátul az edzőpadon, az első lábad stabilan a talajon. "
+                    "Engedd le a tested kontrolláltan, majd az első lábbal nyomd vissza magad."
+                ),
+                "coaching_cues": (
+                    "Az első térd kövesse a lábfej irányát. "
+                    "A törzs maradjon stabil. "
+                    "Ha billegsz, először saját testsúllyal gyakorold."
+                ),
+                "movement_pattern": Exercise.MovementPattern.SQUAT,
+                "difficulty": Exercise.Difficulty.INTERMEDIATE,
+                "default_sets": 3,
+                "default_reps_min": 8,
+                "default_reps_max": 12,
+                "default_rest_seconds": 75,
+                "is_bodyweight": False,
+                "is_unilateral": True,
+                "equipment": ["Edzőpad", "Állítható kézisúlyzó"],
+                "muscles": [
+                    ("Comb elülső része", ExerciseMuscle.MuscleRole.PRIMARY),
+                    ("Farizom", ExerciseMuscle.MuscleRole.PRIMARY),
+                    ("Törzs", ExerciseMuscle.MuscleRole.STABILIZER),
+                ],
+            },
+            {
+                "name": "Step-up padra",
+                "aliases": ["Step-up"],
+                "description": (
+                    "Lépj fel stabilan az edzőpadra vagy emelvényre az egyik lábaddal, "
+                    "majd kontrolláltan lépj vissza. Váltott lábbal ismételd."
+                ),
+                "coaching_cues": (
+                    "Ne rugaszkodj túl sokat a hátsó lábbal. "
+                    "Az elöl lévő láb dolgozzon. "
+                    "A térd ne essen befelé."
+                ),
+                "movement_pattern": Exercise.MovementPattern.SQUAT,
+                "difficulty": Exercise.Difficulty.BEGINNER,
+                "default_sets": 3,
+                "default_reps_min": 8,
+                "default_reps_max": 12,
+                "default_rest_seconds": 60,
+                "is_bodyweight": False,
+                "is_unilateral": True,
+                "equipment": ["Edzőpad", "Állítható kézisúlyzó"],
+                "muscles": [
+                    ("Comb elülső része", ExerciseMuscle.MuscleRole.PRIMARY),
+                    ("Farizom", ExerciseMuscle.MuscleRole.PRIMARY),
+                    ("Vádli", ExerciseMuscle.MuscleRole.SECONDARY),
+                ],
+            },
+            {
+                "name": "Glute bridge",
+                "aliases": ["Glute bridge"],
+                "description": (
+                    "Feküdj hanyatt behajlított térddel. "
+                    "Feszítsd meg a farizmot, emeld fel a csípőd, majd kontrolláltan engedd vissza."
+                ),
+                "coaching_cues": (
+                    "A mozgás tetején ne homoríts túl. "
+                    "A farizmot feszítsd, ne derékból dolgozz. "
+                    "Lassan, kontrolláltan végezd."
+                ),
+                "movement_pattern": Exercise.MovementPattern.HINGE,
+                "difficulty": Exercise.Difficulty.BEGINNER,
+                "default_sets": 3,
+                "default_reps_min": 12,
+                "default_reps_max": 20,
+                "default_rest_seconds": 45,
+                "is_bodyweight": True,
+                "is_unilateral": False,
+                "equipment": ["Jógamatrac"],
+                "muscles": [
+                    ("Farizom", ExerciseMuscle.MuscleRole.PRIMARY),
+                    ("Comb hátsó része", ExerciseMuscle.MuscleRole.SECONDARY),
+                    ("Törzs", ExerciseMuscle.MuscleRole.STABILIZER),
+                ],
+            },
+            {
+                "name": "Kettlebell swing",
+                "aliases": ["Kettlebell swing"],
+                "description": (
+                    "Állj vállszéles terpeszben, a kettlebell legyen előtted. "
+                    "Csípőből indítsd a mozgást, lendítsd a kettlebellt mellkas magasságig, majd engedd vissza kontrolláltan."
+                ),
+                "coaching_cues": (
+                    "Ez csípőhajlítás, nem guggolás. "
+                    "A hát maradjon semleges. "
+                    "A lendületet a csípő adja, ne vállból emeld."
+                ),
+                "movement_pattern": Exercise.MovementPattern.HINGE,
+                "difficulty": Exercise.Difficulty.INTERMEDIATE,
+                "default_sets": 3,
+                "default_reps_min": 12,
+                "default_reps_max": 20,
+                "default_rest_seconds": 60,
+                "is_bodyweight": False,
+                "is_unilateral": False,
+                "equipment": ["Kettlebell"],
+                "muscles": [
+                    ("Farizom", ExerciseMuscle.MuscleRole.PRIMARY),
+                    ("Comb hátsó része", ExerciseMuscle.MuscleRole.PRIMARY),
+                    ("Törzs", ExerciseMuscle.MuscleRole.STABILIZER),
+                ],
+            },
+            {
+                "name": "Húzódzkodás segítve",
+                "aliases": ["Assisted pull-up"],
+                "description": (
+                    "Fogd meg a húzódzkodó rudat, és húzd fel magad kontrolláltan. "
+                    "Ha szükséges, használj lábtámaszt vagy részleges mozgástartományt."
+                ),
+                "coaching_cues": (
+                    "Ne rángasd magad. "
+                    "Mellkast húzd a rúd irányába. "
+                    "A leengedés legyen lassú és kontrollált."
+                ),
+                "movement_pattern": Exercise.MovementPattern.PULL,
+                "difficulty": Exercise.Difficulty.INTERMEDIATE,
+                "default_sets": 3,
+                "default_reps_min": 3,
+                "default_reps_max": 8,
+                "default_rest_seconds": 90,
+                "is_bodyweight": True,
+                "is_unilateral": False,
+                "equipment": ["Húzódzkodó / tolódzkodó állvány"],
+                "muscles": [
+                    ("Széles hátizom", ExerciseMuscle.MuscleRole.PRIMARY),
+                    ("Hát", ExerciseMuscle.MuscleRole.PRIMARY),
+                    ("Bicepsz", ExerciseMuscle.MuscleRole.SECONDARY),
+                    ("Törzs", ExerciseMuscle.MuscleRole.STABILIZER),
+                ],
+            },
+            {
+                "name": "Tolódzkodás segítve",
+                "aliases": ["Assisted dip"],
+                "description": (
+                    "Támaszkodj a tolódzkodó állványon, majd engedd le magad kontrolláltan, "
+                    "és nyomd vissza magad kiinduló helyzetbe."
+                ),
+                "coaching_cues": (
+                    "Ne engedd beesni a vállad. "
+                    "Csak olyan mélyre menj, ami vállból kényelmes. "
+                    "Ha nehéz, használj lábtámaszt."
+                ),
+                "movement_pattern": Exercise.MovementPattern.PUSH,
+                "difficulty": Exercise.Difficulty.INTERMEDIATE,
+                "default_sets": 3,
+                "default_reps_min": 5,
+                "default_reps_max": 10,
+                "default_rest_seconds": 90,
+                "is_bodyweight": True,
+                "is_unilateral": False,
+                "equipment": ["Húzódzkodó / tolódzkodó állvány"],
+                "muscles": [
+                    ("Mell", ExerciseMuscle.MuscleRole.PRIMARY),
+                    ("Tricepsz", ExerciseMuscle.MuscleRole.PRIMARY),
+                    ("Váll", ExerciseMuscle.MuscleRole.SECONDARY),
+                    ("Törzs", ExerciseMuscle.MuscleRole.STABILIZER),
+                ],
+            },
+            {
+                "name": "Kalapács bicepszhajlítás",
+                "aliases": ["Hammer curl"],
+                "description": (
+                    "Állj egyenesen, a kézisúlyzókat semleges fogással tartsd. "
+                    "Hajlítsd a könyököd, majd kontrolláltan engedd vissza a súlyokat."
+                ),
+                "coaching_cues": (
+                    "A könyök maradjon a törzs mellett. "
+                    "Ne lendületből dolgozz. "
+                    "A csukló maradjon semleges helyzetben."
+                ),
+                "movement_pattern": Exercise.MovementPattern.ARMS,
+                "difficulty": Exercise.Difficulty.BEGINNER,
+                "default_sets": 3,
+                "default_reps_min": 10,
+                "default_reps_max": 15,
+                "default_rest_seconds": 60,
+                "is_bodyweight": False,
+                "is_unilateral": False,
+                "equipment": ["Állítható kézisúlyzó"],
+                "muscles": [
+                    ("Bicepsz", ExerciseMuscle.MuscleRole.PRIMARY),
+                ],
+            },
+            {
+                "name": "Kézisúlyzós tricepsz kickback",
+                "aliases": ["Dumbbell triceps kickback"],
+                "description": (
+                    "Dőlj enyhén előre semleges háttal, a felkar legyen közel a törzshöz. "
+                    "Nyújtsd hátra az alkart, majd kontrolláltan engedd vissza."
+                ),
+                "coaching_cues": (
+                    "A felkar ne lengjen. "
+                    "Kis súllyal, kontrolláltan végezd. "
+                    "A mozgás végén feszíts rá a tricepszre."
+                ),
+                "movement_pattern": Exercise.MovementPattern.ARMS,
+                "difficulty": Exercise.Difficulty.BEGINNER,
+                "default_sets": 3,
+                "default_reps_min": 10,
+                "default_reps_max": 15,
+                "default_rest_seconds": 45,
+                "is_bodyweight": False,
+                "is_unilateral": True,
+                "equipment": ["Állítható kézisúlyzó"],
+                "muscles": [
+                    ("Tricepsz", ExerciseMuscle.MuscleRole.PRIMARY),
+                    ("Törzs", ExerciseMuscle.MuscleRole.STABILIZER),
+                ],
+            },
+            {
+                "name": "Oldalsó plank",
+                "aliases": ["Side plank"],
+                "description": (
+                    "Feküdj oldalra, támaszkodj az alkarodra, majd emeld el a csípőd a talajtól. "
+                    "Tartsd a tested egyenes vonalban."
+                ),
+                "coaching_cues": (
+                    "Ne essen le a csípőd. "
+                    "A váll legyen stabil az alkar felett. "
+                    "Rövidebb tartással kezdj, ha nehéz."
+                ),
+                "movement_pattern": Exercise.MovementPattern.CORE,
+                "difficulty": Exercise.Difficulty.BEGINNER,
+                "default_sets": 3,
+                "default_reps_min": 20,
+                "default_reps_max": 40,
+                "default_rest_seconds": 45,
+                "is_bodyweight": True,
+                "is_unilateral": True,
+                "equipment": ["Jógamatrac"],
+                "muscles": [
+                    ("Törzs", ExerciseMuscle.MuscleRole.PRIMARY),
+                    ("Váll", ExerciseMuscle.MuscleRole.STABILIZER),
+                ],
+            },
+            {
+                "name": "Dead bug",
+                "aliases": ["Dead bug"],
+                "description": (
+                    "Feküdj hanyatt, karok felfelé, térdek 90 fokban. "
+                    "Engedd le ellentétes kart és lábat kontrolláltan, majd térj vissza középre."
+                ),
+                "coaching_cues": (
+                    "A derekad maradjon közel a talajhoz. "
+                    "Lassan dolgozz, ne lendületből. "
+                    "Ha elveszik a kontroll, csökkentsd a mozgástartományt."
+                ),
+                "movement_pattern": Exercise.MovementPattern.CORE,
+                "difficulty": Exercise.Difficulty.BEGINNER,
+                "default_sets": 3,
+                "default_reps_min": 8,
+                "default_reps_max": 12,
+                "default_rest_seconds": 45,
+                "is_bodyweight": True,
+                "is_unilateral": True,
+                "equipment": ["Jógamatrac"],
+                "muscles": [
+                    ("Törzs", ExerciseMuscle.MuscleRole.PRIMARY),
+                ],
+            },
+            {
+                "name": "Mountain climber",
+                "aliases": ["Mountain climber"],
+                "description": (
+                    "Helyezkedj fekvőtámasz pozícióba, majd váltva húzd a térdeket a mellkas irányába. "
+                    "Tartsd a törzsed stabilan a mozgás közben."
+                ),
+                "coaching_cues": (
+                    "Ne essen be a csípőd. "
+                    "A váll maradjon stabil a kéz felett. "
+                    "Kezdd lassabban, majd fokozatosan gyorsíts."
+                ),
+                "movement_pattern": Exercise.MovementPattern.CORE,
+                "difficulty": Exercise.Difficulty.BEGINNER,
+                "default_sets": 3,
+                "default_reps_min": 20,
+                "default_reps_max": 40,
+                "default_rest_seconds": 45,
+                "is_bodyweight": True,
+                "is_unilateral": True,
+                "equipment": ["Saját testsúly", "Jógamatrac"],
+                "muscles": [
+                    ("Törzs", ExerciseMuscle.MuscleRole.PRIMARY),
+                    ("Váll", ExerciseMuscle.MuscleRole.SECONDARY),
+                ],
+            },
+            {
+                "name": "Ferdepados kézisúlyzós nyomás",
+                "aliases": ["Incline dumbbell press"],
+                "description": (
+                    "Állítsd az edzőpadot enyhén döntött helyzetbe. "
+                    "Nyomd fel a kézisúlyzókat kontrolláltan, majd engedd vissza mellkas felső részéhez."
+                ),
+                "coaching_cues": (
+                    "A lapockák maradjanak stabilan. "
+                    "Ne pattintsd meg a súlyokat. "
+                    "Ha a vállad kényelmetlen, csökkentsd a pad dőlésszögét."
+                ),
+                "movement_pattern": Exercise.MovementPattern.PUSH,
+                "difficulty": Exercise.Difficulty.BEGINNER,
+                "default_sets": 3,
+                "default_reps_min": 8,
+                "default_reps_max": 12,
+                "default_rest_seconds": 75,
+                "is_bodyweight": False,
+                "is_unilateral": False,
+                "equipment": ["Állítható kézisúlyzó", "Edzőpad"],
+                "muscles": [
+                    ("Mell", ExerciseMuscle.MuscleRole.PRIMARY),
+                    ("Váll", ExerciseMuscle.MuscleRole.SECONDARY),
+                    ("Tricepsz", ExerciseMuscle.MuscleRole.SECONDARY),
+                ],
+            },
+            {
+                "name": "Kézisúlyzós fordított tárogatás",
+                "aliases": ["Dumbbell reverse fly"],
+                "description": (
+                    "Dőlj előre semleges háttal, a kézisúlyzók legyenek a vállak alatt. "
+                    "Emeld oldalra a karokat kontrolláltan, majd lassan engedd vissza."
+                ),
+                "coaching_cues": (
+                    "Kis súlyt használj. "
+                    "Ne lendületből emelj. "
+                    "A mozgást a hátsó váll és felső hát vezesse."
+                ),
+                "movement_pattern": Exercise.MovementPattern.PULL,
+                "difficulty": Exercise.Difficulty.BEGINNER,
+                "default_sets": 3,
+                "default_reps_min": 10,
+                "default_reps_max": 15,
+                "default_rest_seconds": 60,
+                "is_bodyweight": False,
+                "is_unilateral": False,
+                "equipment": ["Állítható kézisúlyzó"],
+                "muscles": [
+                    ("Váll", ExerciseMuscle.MuscleRole.PRIMARY),
+                    ("Hát", ExerciseMuscle.MuscleRole.SECONDARY),
+                ],
+            },
         ]
 
         for item in exercises:

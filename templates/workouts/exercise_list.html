@@ -3,18 +3,6 @@
 {% block content %}
 <div class="container mt-4">
 
-    <h1 class="mb-3">Edzés</h1>
-
-    <div class="card mb-4">
-        <div class="card-body">
-            <h5 class="card-title">Gyakorlat katalógus</h5>
-            <p class="card-text">
-                Itt láthatók az adatbázisban szereplő aktív gyakorlatok.
-                Később ezekből fogjuk generálni az edzésterveket.
-            </p>
-        </div>
-    </div>
-
 <div class="card mb-4">
     <div class="card-body">
         <h5 class="card-title">Mai edzés generálása</h5>
@@ -63,6 +51,11 @@
         </a>
     </div>
 </div>
+
+    <details class="mb-4">
+    <summary class="fw-semibold mb-3">
+        Gyakorlat katalógus megnyitása
+    </summary>
 
     {% if exercises %}
         <div class="row">
@@ -119,6 +112,8 @@
             Még nincs aktív gyakorlat az adatbázisban.
         </div>
     {% endif %}
+
+    </details>
 
 </div>
 {% endblock %}

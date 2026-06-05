@@ -17,9 +17,10 @@
         <div class="card shadow-sm h-100">
             <div class="card-body">
                 <h2 class="h5 card-title">Nyelvtanulás</h2>
-                <p class="card-text text-muted">
-                    Szókártyák, később mondatkártyák, gyakorlási irány és statisztika.
-                </p>
+                    <p class="card-text text-muted">
+                        Szókártyás gyakorlás, paklik, feleletválasztós feladatok
+                        és gyakorlási eredmények.
+                    </p>
                 <a href="{% url 'vocabulary:home' %}" class="btn btn-primary">
                     Megnyitás
                 </a>
@@ -30,12 +31,14 @@
     <div class="col-12 col-md-6">
         <div class="card shadow-sm h-100">
             <div class="card-body">
-                <h2 class="h5 card-title">Edzés</h2>
-                <p class="card-text text-muted">
-                    A korábbi kondizós alkalmazás későbbi integrációs helye.
+                <h2>Edzés</h2>
+                <p>
+                    Köredzés generálás, mobilos edzésflow, pihenőidőzítő,
+                    videós gyakorlatleírások és edzéstörténet.
                 </p>
-                <a href="#" class="btn btn-outline-primary disabled">
-                    Hamarosan
+
+                <a href="{% url 'workouts:exercise_list' %}" class="btn btn-primary">
+                    Megnyitás
                 </a>
             </div>
         </div>
