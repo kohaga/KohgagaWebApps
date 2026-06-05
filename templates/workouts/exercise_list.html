@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+
+    <h1 class="mb-3">Edzés</h1>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">Gyakorlat katalógus</h5>
+            <p class="card-text">
+                Itt láthatók az adatbázisban szereplő aktív gyakorlatok.
+                Később ezekből fogjuk generálni az edzésterveket.
+            </p>
+        </div>
+    </div>
+
+    <form method="post" action="{% url 'workouts:generate_workout' %}" class="mb-4">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-success btn-lg w-100">
+            Mai edzés generálása
+        </button>
+    </form>
+
+    {% if exercises %}
+        <div class="row">
+            {% for exercise in exercises %}
+                <div class="col-12 col-md-6 col-lg-4 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body">
+
+                            <h5 class="card-title">
+                                {{ exercise.name }}
+                            </h5>
+
+                            <p class="mb-2">
+                                <strong>Mozgásminta:</strong>
+                                {{ exercise.get_movement_pattern_display }}
+                            </p>
+
+                            <p class="mb-2">
+                                <strong>Nehézség:</strong>
+                                {{ exercise.get_difficulty_display }}
+                            </p>
+
+                            <p class="mb-2">
+                                <strong>Alap cél:</strong>
+                                {{ exercise.default_sets }} x
+                                {{ exercise.default_reps_min }}-{{ exercise.default_reps_max }}
+                            </p>
+
+                            <p class="mb-2">
+                                <strong>Pihenő:</strong>
+                                {{ exercise.default_rest_seconds }} mp
+                            </p>
+
+                            {% if exercise.equipment.all %}
+                                <p class="mb-2">
+                                    <strong>Eszköz:</strong>
+                                    {% for item in exercise.equipment.all %}
+                                        {{ item.name }}{% if not forloop.last %}, {% endif %}
+                                    {% endfor %}
+                                </p>
+                            {% endif %}
+
+                            <a href="{% url 'workouts:exercise_detail' exercise.id %}" class="btn btn-primary mt-2">
+                                Részletek
+                            </a>
+
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-warning">
+            Még nincs aktív gyakorlat az adatbázisban.
+        </div>
+    {% endif %}
+
+</div>
+{% endblock %}

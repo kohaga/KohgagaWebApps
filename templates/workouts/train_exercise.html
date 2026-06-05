@@ -1,0 +1,222 @@
+{% extends "base.html" %}
+
+{% block title %}Edzés - {{ session_exercise.exercise.name }}{% endblock %}
+
+{% block content %}
+<div class="container mt-2">
+
+    <div class="position-sticky top-0 bg-light pb-2 mb-3" style="z-index: 10;">
+        <div class="card shadow-sm">
+            <div class="card-body py-3">
+
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="badge text-bg-primary">
+                        {{ block_label }}
+                    </span>
+
+                    <span class="small text-muted">
+                        {{ completed_steps }} / {{ total_steps }} kész
+                    </span>
+                </div>
+
+                <div class="progress mb-2" style="height: 8px;">
+                    <div
+                        class="progress-bar"
+                        role="progressbar"
+                        style="width: {{ progress_percent }}%;"
+                        aria-valuenow="{{ progress_percent }}"
+                        aria-valuemin="0"
+                        aria-valuemax="100">
+                    </div>
+                </div>
+
+                {% if block_label == "Köredzés" %}
+                    <div class="small text-muted mb-1">
+                        {{ round_number }}. kör / {{ total_rounds }}
+                    </div>
+                {% endif %}
+
+                <h2 class="h4 mb-1">
+                    {{ session_exercise.exercise.name }}
+                </h2>
+
+                <div class="small text-muted">
+                    Cél:
+                    {{ session_exercise.target_reps_min }}-{{ session_exercise.target_reps_max }}
+
+                    {% if session_exercise.target_weight_kg %}
+                        / {{ session_exercise.target_weight_kg }} kg
+                    {% endif %}
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-3 text-center">
+        <div class="card-body">
+            <div class="text-muted mb-1">
+                Gyakorlat ideje
+            </div>
+
+            <div id="work-timer" class="display-4 fw-bold">
+                00:00
+            </div>
+        </div>
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5>
+                    {% if block_label == "Köredzés" %}
+                        {{ round_number }}. kör eredménye
+                    {% else %}
+                        Teljesítés
+                    {% endif %}
+                </h5>
+
+                <div class="row g-2">
+                    <div class="col-4">
+                        <label class="form-label">Ism.</label>
+                        <input
+                            type="number"
+                            name="reps"
+                            class="form-control form-control-lg"
+                            min="0"
+                            inputmode="numeric"
+                            value="{{ initial_reps }}"
+                        >
+                    </div>
+
+                    <div class="col-4">
+                        <label class="form-label">Kg</label>
+                        <input
+                            type="text"
+                            name="weight"
+                            class="form-control form-control-lg"
+                            inputmode="decimal"
+                            value="{{ initial_weight_kg }}"
+                        >
+                    </div>
+
+                    <div class="col-4">
+                        <label class="form-label">RPE</label>
+                        <input
+                            type="number"
+                            name="rpe"
+                            class="form-control form-control-lg"
+                            min="1"
+                            max="10"
+                            inputmode="numeric"
+                            value="{{ initial_rpe }}"
+                        >
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="d-grid gap-2 mb-4">
+            <button type="submit" class="btn btn-success btn-lg">
+                Mentés és tovább
+            </button>
+
+            <a href="{% url 'workouts:workout_session_detail' session.id %}" class="btn btn-outline-secondary">
+                Vissza az edzéshez
+            </a>
+        </div>
+
+    </form>
+
+    <details class="mb-3">
+        <summary class="fw-semibold">Leírás és technikai tippek</summary>
+
+        <div class="card mt-2">
+            <div class="card-body">
+                <p>{{ session_exercise.exercise.description|linebreaks }}</p>
+
+                {% if session_exercise.exercise.coaching_cues %}
+                    <p><strong>Figyelj erre:</strong></p>
+                    <p>{{ session_exercise.exercise.coaching_cues|linebreaks }}</p>
+                {% endif %}
+            </div>
+        </div>
+    </details>
+
+    {% if session_exercise.exercise.video_url %}
+        <details class="mb-3">
+            <summary class="fw-semibold">Videó megtekintése</summary>
+
+            {% if session_exercise.exercise.video_embed_url %}
+                <div class="ratio ratio-16x9 mt-2 bg-dark">
+                    <iframe
+                        src="{{ session_exercise.exercise.video_embed_url }}?rel=0&amp;origin={{ request.scheme }}://{{ request.get_host }}"
+                        title="{{ session_exercise.exercise.name }}"
+                        referrerpolicy="strict-origin-when-cross-origin"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        allowfullscreen>
+                    </iframe>
+                </div>
+            {% else %}
+                <div class="alert alert-warning mt-2">
+                    Ehhez a linkhez nem sikerült beágyazható YouTube URL-t készíteni.
+                </div>
+            {% endif %}
+
+            <p class="mt-2">
+                <a href="{{ session_exercise.exercise.video_url }}" target="_blank" rel="noopener noreferrer">
+                    Megnyitás YouTube-on
+                </a>
+            </p>
+        </details>
+    {% endif %}
+
+    <details class="mb-4">
+        <summary class="fw-semibold">Megjegyzés</summary>
+
+        <div class="card mt-2">
+            <div class="card-body">
+                <label class="form-label">Megjegyzés ehhez a körhöz</label>
+                <input
+                    type="text"
+                    name="note"
+                    class="form-control"
+                    placeholder="opcionális"
+                    value="{{ initial_note }}"
+                >
+            </div>
+        </div>
+    </details>
+
+</div>
+
+<script>
+    (function () {
+        const timerElement = document.getElementById("work-timer");
+
+        if (!timerElement) {
+            return;
+        }
+
+        let elapsedSeconds = 0;
+
+        function renderTimer() {
+            const minutes = Math.floor(elapsedSeconds / 60);
+            const seconds = elapsedSeconds % 60;
+
+            timerElement.textContent =
+                String(minutes).padStart(2, "0") + ":" + String(seconds).padStart(2, "0");
+        }
+
+        renderTimer();
+
+        setInterval(function () {
+            elapsedSeconds += 1;
+            renderTimer();
+        }, 1000);
+    })();
+</script>
+{% endblock %}

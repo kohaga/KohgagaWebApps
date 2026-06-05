@@ -57,6 +57,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'core',
     'vocabulary',
+    'workouts',
 ]
 
 MIDDLEWARE = [
@@ -146,3 +147,5 @@ LOGOUT_REDIRECT_URL = "/login/"
 if not DEBUG:
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
+
+SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"

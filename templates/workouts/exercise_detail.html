@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+
+    <a href="{% url 'workouts:exercise_list' %}" class="btn btn-secondary mb-3">
+        Vissza a gyakorlatokhoz
+    </a>
+
+    <div class="card">
+        <div class="card-body">
+
+            <h1 class="card-title mb-3">{{ exercise.name }}</h1>
+
+            <p>
+                <strong>Mozgásminta:</strong>
+                {{ exercise.get_movement_pattern_display }}
+            </p>
+
+            <p>
+                <strong>Nehézség:</strong>
+                {{ exercise.get_difficulty_display }}
+            </p>
+
+            <p>
+                <strong>Alap cél:</strong>
+                {{ exercise.default_sets }} sorozat,
+                {{ exercise.default_reps_min }}-{{ exercise.default_reps_max }} ismétlés
+            </p>
+
+            <p>
+                <strong>Pihenő:</strong>
+                {{ exercise.default_rest_seconds }} mp
+            </p>
+
+            {% if exercise.equipment.all %}
+                <p>
+                    <strong>Eszköz:</strong>
+                    {% for item in exercise.equipment.all %}
+                        {{ item.name }}{% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                </p>
+            {% endif %}
+
+            {% if exercise.exercise_muscles.all %}
+                <p>
+                    <strong>Érintett izomcsoportok:</strong>
+                </p>
+
+                <ul>
+                    {% for item in exercise.exercise_muscles.all %}
+                        <li>
+                            {{ item.muscle_group.name }}
+                            — {{ item.get_role_display }}
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+
+            <hr>
+
+            <h4>Leírás</h4>
+            <p>{{ exercise.description|linebreaks }}</p>
+
+            {% if exercise.coaching_cues %}
+                <h4>Technikai figyelmeztetések</h4>
+                <p>{{ exercise.coaching_cues|linebreaks }}</p>
+            {% endif %}
+
+            {% if exercise.video_url %}
+                <h4>Videó</h4>
+
+                {% if exercise.video_embed_url %}
+                    <div class="ratio ratio-16x9 mb-3 bg-dark">
+                        <iframe
+                            src="{{ exercise.video_embed_url }}?rel=0&amp;origin={{ request.scheme }}://{{ request.get_host }}"
+                            title="{{ exercise.name }}"
+                            referrerpolicy="strict-origin-when-cross-origin"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                            allowfullscreen>
+                        </iframe>
+                    </div>
+                {% else %}
+                    <div class="alert alert-warning">
+                        Ehhez a linkhez nem sikerült beágyazható YouTube URL-t készíteni.
+                    </div>
+                {% endif %}
+
+                <p>
+                    <a href="{{ exercise.video_url }}" target="_blank" rel="noopener noreferrer">
+                        Megnyitás YouTube-on
+                    </a>
+                </p>
+            {% endif %}
+
+        </div>
+    </div>
+
+</div>
+{% endblock %}

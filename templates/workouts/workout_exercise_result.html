@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+
+    <a href="{% url 'workouts:workout_session_detail' session.id %}" class="btn btn-secondary mb-3">
+        Vissza az edzéshez
+    </a>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <h1 class="card-title">
+                {{ session_exercise.exercise.name }}
+            </h1>
+
+            <p class="mb-2">
+                <strong>Cél:</strong>
+                {{ session_exercise.target_sets }} x
+                {{ session_exercise.target_reps_min }}-{{ session_exercise.target_reps_max }}
+                {% if session_exercise.target_weight_kg %}
+                    / {{ session_exercise.target_weight_kg }} kg
+                {% endif %}
+            </p>
+
+            <p class="mb-0">
+                <strong>Pihenő:</strong>
+                {{ session_exercise.rest_seconds }} mp
+            </p>
+        </div>
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <div class="card">
+            <div class="card-body">
+
+                <h4 class="mb-3">Teljesítés</h4>
+
+                {% for row in set_rows %}
+                    <div class="border rounded p-3 mb-3">
+                        <h5>{{ row.set_number }}. sorozat</h5>
+
+                        <div class="row g-2">
+                            <div class="col-12 col-md-4">
+                                <label class="form-label">Ismétlés</label>
+                                <input
+                                    type="number"
+                                    name="reps_{{ row.set_number }}"
+                                    class="form-control"
+                                    min="0"
+                                    inputmode="numeric"
+                                    value="{{ row.result.reps|default_if_none:'' }}"
+                                >
+                            </div>
+
+                            <div class="col-12 col-md-4">
+                                <label class="form-label">Súly kg</label>
+                                <input
+                                    type="text"
+                                    name="weight_{{ row.set_number }}"
+                                    class="form-control"
+                                    inputmode="decimal"
+                                    placeholder="pl. 12.5"
+                                    value="{{ row.result.weight_kg|default_if_none:'' }}"
+                                >
+                            </div>
+
+                            <div class="col-12 col-md-4">
+                                <label class="form-label">RPE 1-10</label>
+                                <input
+                                    type="number"
+                                    name="rpe_{{ row.set_number }}"
+                                    class="form-control"
+                                    min="1"
+                                    max="10"
+                                    inputmode="numeric"
+                                    value="{{ row.result.rpe|default_if_none:'' }}"
+                                >
+                            </div>
+
+                            <div class="col-12">
+                                <label class="form-label">Megjegyzés</label>
+                                <input
+                                    type="text"
+                                    name="note_{{ row.set_number }}"
+                                    class="form-control"
+                                    placeholder="opcionális"
+                                    value="{{ row.result.note|default_if_none:'' }}"
+                                >
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+
+                <div class="d-grid gap-2">
+                    <button type="submit" name="next_action" value="next" class="btn btn-success btn-lg">
+                        Mentés és következő gyakorlat
+                    </button>
+
+                    <button type="submit" name="next_action" value="stay" class="btn btn-outline-primary">
+                        Mentés és vissza az edzéshez
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </form>
+
+</div>
+{% endblock %}

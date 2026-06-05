@@ -14,9 +14,20 @@
 
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container">
+
         <a class="navbar-brand fw-semibold" href="{% url 'core:home' %}">
             Learning Portal
         </a>
+
+        {% if request.user.is_authenticated %}
+            <div class="navbar-nav me-auto">
+                <a class="nav-link" href="{% url 'workouts:exercise_list' %}">
+                    Edzés
+                </a>
+            </div>
+        {% else %}
+            <div class="me-auto"></div>
+        {% endif %}
 
         <div class="d-flex align-items-center gap-2">
             {% if request.user.is_authenticated %}
@@ -36,10 +47,20 @@
                 </a>
             {% endif %}
         </div>
+
     </div>
 </nav>
 
 <main class="container py-4">
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} mb-3">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
     {% block content %}
     {% endblock %}
 </main>
