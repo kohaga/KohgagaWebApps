@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block title %}Pihenő{% endblock %}
+
+{% block content %}
+<div class="container mt-3">
+
+    <div class="card text-center shadow-sm">
+        <div class="card-body">
+
+            <div class="text-muted mb-2">
+                Pihenő
+            </div>
+
+            <div
+                id="rest-timer"
+                class="display-1 fw-bold mb-3"
+                data-seconds="{{ rest_seconds }}">
+                00:00
+            </div>
+
+            <hr>
+
+            <div class="text-muted mb-2">
+                Következő lépés
+            </div>
+
+            <div class="mb-2">
+                <span class="badge text-bg-primary">
+                    {{ next_step.block_label }}
+                </span>
+
+                {% if next_step.block_label == "Köredzés" %}
+                    <span class="badge text-bg-secondary">
+                        {{ next_step.round_number }}. kör / {{ next_step.total_rounds }}
+                    </span>
+                {% endif %}
+            </div>
+
+            <h2 class="h3 mb-3">
+                {{ next_session_exercise.exercise.name }}
+            </h2>
+
+            <p class="mb-2">
+                <strong>Cél:</strong>
+                {{ next_session_exercise.target_reps_min }}-{{ next_session_exercise.target_reps_max }}
+
+                {% if next_session_exercise.target_weight_kg %}
+                    / {{ next_session_exercise.target_weight_kg }} kg
+                {% endif %}
+            </p>
+
+            <div class="d-grid gap-2 mt-4">
+                <a
+                    href="{% url 'workouts:train_workout' session.id %}"
+                    class="btn btn-success btn-lg">
+                    Következő gyakorlat
+                </a>
+
+                <button type="button" id="add-30" class="btn btn-outline-primary">
+                    +30 mp
+                </button>
+
+                <a href="{% url 'workouts:workout_session_detail' session.id %}" class="btn btn-outline-secondary">
+                    Vissza az edzéshez
+                </a>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+<script>
+    (function () {
+        const timerElement = document.getElementById("rest-timer");
+        const addButton = document.getElementById("add-30");
+
+        let remainingSeconds = parseInt(timerElement.dataset.seconds || "0", 10);
+
+        function renderTimer() {
+            const minutes = Math.floor(remainingSeconds / 60);
+            const seconds = remainingSeconds % 60;
+
+            timerElement.textContent =
+                String(minutes).padStart(2, "0") + ":" + String(seconds).padStart(2, "0");
+        }
+
+        renderTimer();
+
+        const intervalId = setInterval(function () {
+            if (remainingSeconds > 0) {
+                remainingSeconds -= 1;
+                renderTimer();
+                return;
+            }
+
+            clearInterval(intervalId);
+            timerElement.classList.add("text-success");
+
+            if (navigator.vibrate) {
+                navigator.vibrate(300);
+            }
+        }, 1000);
+
+        addButton.addEventListener("click", function () {
+            remainingSeconds += 30;
+            timerElement.classList.remove("text-success");
+            renderTimer();
+        });
+    })();
+</script>
+{% endblock %}

@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block title %}Edzéstörténet{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1 class="mb-0">Edzéstörténet</h1>
+
+        <a href="{% url 'workouts:exercise_list' %}" class="btn btn-outline-secondary">
+            Vissza
+        </a>
+    </div>
+
+    {% if session_rows %}
+
+        {% for row in session_rows %}
+            <div class="card mb-3">
+                <div class="card-body">
+
+                    <div class="d-flex justify-content-between align-items-start gap-2">
+                        <div>
+                            <h2 class="h5 mb-1">
+                                {{ row.session.title }}
+                            </h2>
+
+                            <p class="text-muted mb-2">
+                                {{ row.session.created_at|date:"Y.m.d. H:i" }}
+                            </p>
+                        </div>
+
+                        {% if row.session.status == "completed" %}
+                            <span class="badge text-bg-success">
+                                Lezárva
+                            </span>
+                        {% elif row.session.status == "in_progress" %}
+                            <span class="badge text-bg-primary">
+                                Folyamatban
+                            </span>
+                        {% elif row.session.status == "planned" %}
+                            <span class="badge text-bg-warning">
+                                Tervezett
+                            </span>
+                        {% else %}
+                            <span class="badge text-bg-secondary">
+                                {{ row.session.get_status_display }}
+                            </span>
+                        {% endif %}
+                    </div>
+
+                    <p class="mb-2">
+                        <strong>Haladás:</strong>
+                        {{ row.completed_steps }} / {{ row.total_steps }} lépés
+                    </p>
+
+                    <div class="progress mb-3" style="height: 8px;">
+                        <div
+                            class="progress-bar"
+                            role="progressbar"
+                            style="width: {{ row.progress_percent }}%;"
+                            aria-valuenow="{{ row.progress_percent }}"
+                            aria-valuemin="0"
+                            aria-valuemax="100">
+                        </div>
+                    </div>
+
+                    <div class="row small mb-3">
+                        <div class="col-6">
+                            <strong>Tervezett idő</strong><br>
+                            {% if row.session.planned_duration_minutes %}
+                                {{ row.session.planned_duration_minutes }} perc
+                            {% else %}
+                                -
+                            {% endif %}
+                        </div>
+
+                        <div class="col-6">
+                            <strong>Tényleges idő</strong><br>
+                            {% if row.actual_duration_minutes %}
+                                {{ row.actual_duration_minutes }} perc
+                            {% else %}
+                                -
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'workouts:workout_session_detail' row.session.id %}" class="btn btn-outline-primary">
+                            Edzés megnyitása
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+        {% endfor %}
+
+    {% else %}
+        <div class="alert alert-info">
+            Még nincs edzéselőzmény.
+        </div>
+    {% endif %}
+
+</div>
+{% endblock %}
