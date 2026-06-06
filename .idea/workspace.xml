@@ -3,10 +3,6 @@
   <component name="ChangeListManager">
     <list default="true" id="040faf6f-1ff8-430c-a680-f487e0a2c2a4" name="Changes" comment="Add configurable workout generator">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/base.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/base.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/core/home.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/core/home.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/workouts/exercise_list.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/workouts/exercise_list.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/workouts/management/commands/seed_workouts.py" beforeDir="false" afterPath="$PROJECT_DIR$/workouts/management/commands/seed_workouts.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
