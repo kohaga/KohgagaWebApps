@@ -149,3 +149,4 @@ if not DEBUG:
     CSRF_COOKIE_SECURE = True
 
 SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"
+DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
