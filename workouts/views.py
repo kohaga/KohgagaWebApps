@@ -13,7 +13,12 @@ from .models import (
     WorkoutSessionExercise,
     WorkoutSetResult,
 )
-from .services import generate_workout_for_user, get_workout_profile_choices
+from .services import (
+    generate_workout_for_user,
+    get_training_goal_choices,
+    get_workout_profile_choices,
+    replace_session_exercise_for_user,
+)
 
 
 @login_required
@@ -33,6 +38,7 @@ def exercise_list(request):
         "workouts/exercise_list.html",
         {
             "exercises": exercises,
+            "training_goals": get_training_goal_choices(),
             "workout_profiles": get_workout_profile_choices(),
         },
     )
@@ -130,6 +136,10 @@ def generate_workout(request):
         )
 
     workout_profile = request.POST.get("workout_profile", "full_body")
+    training_goal = request.POST.get(
+        "training_goal",
+        WorkoutSession.TrainingGoal.CALORIE_BURN,
+    )
     circuit_rounds = request.POST.get("circuit_rounds", 3)
     circuit_exercise_count = request.POST.get("circuit_exercise_count", 3)
 
@@ -138,6 +148,7 @@ def generate_workout(request):
             user=request.user,
             planned_duration_minutes=45,
             workout_profile=workout_profile,
+            training_goal=training_goal,
             circuit_rounds=circuit_rounds,
             circuit_exercise_count=circuit_exercise_count,
         )
@@ -198,6 +209,10 @@ def workout_session_detail(request, session_id):
     if circuit_items:
         circuit_rounds = max(item.target_sets for item in circuit_items)
 
+    actual_duration_minutes = None
+    if session.actual_duration_seconds is not None:
+        actual_duration_minutes = round(session.actual_duration_seconds / 60)
+
     return render(
         request,
         "workouts/workout_session_detail.html",
@@ -210,6 +225,7 @@ def workout_session_detail(request, session_id):
             "completed_steps": completed_steps,
             "progress_percent": progress_percent,
             "circuit_rounds": circuit_rounds,
+            "actual_duration_minutes": actual_duration_minutes,
         },
     )
 
@@ -371,6 +387,26 @@ def train_workout(request, session_id, session_exercise_id=None):
     round_number = current_step["round_number"]
 
     if request.method == "POST":
+        action = request.POST.get("action", "save")
+
+        if action == "replace":
+            original_exercise_name = session_exercise.exercise.name
+
+            try:
+                replacement = replace_session_exercise_for_user(
+                    request.user,
+                    session_exercise,
+                )
+            except ValueError as error:
+                messages.error(request, str(error))
+                return redirect("workouts:train_workout", session_id=session.id)
+
+            messages.success(
+                request,
+                f"{original_exercise_name} lecserélve erre: {replacement.name}.",
+            )
+            return redirect("workouts:train_workout", session_id=session.id)
+
         try:
             _save_step_result(request, session_exercise, round_number)
         except ValueError as error:
@@ -422,6 +458,11 @@ def train_workout(request, session_id, session_exercise_id=None):
         initial_reps = user_profile.last_reps or ""
         initial_weight_kg = user_profile.last_weight_kg or ""
 
+    can_replace_exercise = (
+        session_exercise.block_type == WorkoutSessionExercise.BlockType.CIRCUIT
+        and not session_exercise.set_results.filter(is_completed=True).exists()
+    )
+
     return render(
         request,
         "workouts/train_exercise.html",
@@ -439,6 +480,7 @@ def train_workout(request, session_id, session_exercise_id=None):
             "initial_weight_kg": initial_weight_kg,
             "initial_rpe": initial_rpe,
             "initial_note": initial_note,
+            "can_replace_exercise": can_replace_exercise,
         },
     )
 
@@ -667,20 +709,33 @@ def _get_current_workout_step(session):
         if item.block_type == WorkoutSessionExercise.BlockType.CIRCUIT
     ]
 
-    max_rounds = max(
-        [item.target_sets for item in circuit_items],
-        default=0,
-    )
-
-    for round_number in range(1, max_rounds + 1):
+    if session.training_goal == WorkoutSession.TrainingGoal.MUSCLE_GAIN:
+        # Izomtömeg-növelés: A-A-A, majd B-B-B, majd C-C-C.
         for item in circuit_items:
-            if round_number <= item.target_sets and not _has_completed_round(item, round_number):
-                return {
-                    "session_exercise": item,
-                    "round_number": round_number,
-                    "total_rounds": item.target_sets,
-                    "block_label": "Köredzés",
-                }
+            for round_number in range(1, item.target_sets + 1):
+                if not _has_completed_round(item, round_number):
+                    return {
+                        "session_exercise": item,
+                        "round_number": round_number,
+                        "total_rounds": item.target_sets,
+                        "block_label": "Sorozatok",
+                    }
+    else:
+        # Kalóriaégetés: A-B-C, majd újra A-B-C körönként.
+        max_rounds = max(
+            [item.target_sets for item in circuit_items],
+            default=0,
+        )
+
+        for round_number in range(1, max_rounds + 1):
+            for item in circuit_items:
+                if round_number <= item.target_sets and not _has_completed_round(item, round_number):
+                    return {
+                        "session_exercise": item,
+                        "round_number": round_number,
+                        "total_rounds": item.target_sets,
+                        "block_label": "Köredzés",
+                    }
 
     cooldown_items = [
         item for item in session_exercises

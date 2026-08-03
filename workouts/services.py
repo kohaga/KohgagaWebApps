@@ -92,21 +92,40 @@ def get_workout_profile_choices():
     ]
 
 
+def get_training_goal_choices():
+    return [
+        {
+            "value": value,
+            "label": label,
+        }
+        for value, label in WorkoutSession.TrainingGoal.choices
+    ]
+
+
 def generate_workout_for_user(
     user,
     planned_duration_minutes=45,
     workout_profile="full_body",
+    training_goal=WorkoutSession.TrainingGoal.CALORIE_BURN,
     circuit_rounds=3,
     circuit_exercise_count=3,
 ):
     """
-    Generates a circuit workout:
-    warmup -> selected circuit exercises x selected rounds -> cooldown.
+    Generates a workout with two execution modes:
+    - calorie burn: warmup -> A-B-C by rounds -> cooldown
+    - muscle gain: warmup -> all sets of A, then B, then C -> cooldown
+
     If the selected profile does not have enough focus exercises,
     supplementary exercises are used as fallback.
     """
 
     profile = WORKOUT_PROFILES.get(workout_profile, WORKOUT_PROFILES["full_body"])
+
+    valid_training_goals = {
+        value for value, _label in WorkoutSession.TrainingGoal.choices
+    }
+    if training_goal not in valid_training_goals:
+        training_goal = WorkoutSession.TrainingGoal.CALORIE_BURN
 
     circuit_rounds = _clamp_int(circuit_rounds, min_value=2, max_value=4, default=3)
     circuit_exercise_count = _clamp_int(
@@ -119,8 +138,14 @@ def generate_workout_for_user(
     excluded_exercise_ids = _get_excluded_exercise_ids(user)
     recent_exercise_ids = _get_recent_exercise_ids(user)
 
+    warmup_movement_pattern = (
+        Exercise.MovementPattern.MOBILITY
+        if training_goal == WorkoutSession.TrainingGoal.MUSCLE_GAIN
+        else Exercise.MovementPattern.CARDIO
+    )
+
     warmup = _select_exercise_by_selector(
-        selector={"movement_patterns": [Exercise.MovementPattern.CARDIO]},
+        selector={"movement_patterns": [warmup_movement_pattern]},
         excluded_exercise_ids=excluded_exercise_ids,
         recent_exercise_ids=set(),
         already_selected_ids=set(),
@@ -164,12 +189,28 @@ def generate_workout_for_user(
     if warmup:
         cooldown_excluded_ids.add(warmup.id)
 
+    cooldown_movement_pattern = (
+        Exercise.MovementPattern.STRETCHING
+        if training_goal == WorkoutSession.TrainingGoal.MUSCLE_GAIN
+        else Exercise.MovementPattern.CARDIO
+    )
+
     cooldown = _select_exercise_by_selector(
-        selector={"movement_patterns": [Exercise.MovementPattern.CARDIO]},
+        selector={"movement_patterns": [cooldown_movement_pattern]},
         excluded_exercise_ids=excluded_exercise_ids,
         recent_exercise_ids=set(),
         already_selected_ids=cooldown_excluded_ids,
     )
+
+    # Backward-compatible fallback: if no stretching exercise exists yet,
+    # use a mobility exercise instead of dropping the cooldown completely.
+    if not cooldown and training_goal == WorkoutSession.TrainingGoal.MUSCLE_GAIN:
+        cooldown = _select_exercise_by_selector(
+            selector={"movement_patterns": [Exercise.MovementPattern.MOBILITY]},
+            excluded_exercise_ids=excluded_exercise_ids,
+            recent_exercise_ids=set(),
+            already_selected_ids=cooldown_excluded_ids,
+        )
 
     if not cooldown:
         cooldown = warmup
@@ -180,10 +221,11 @@ def generate_workout_for_user(
     with transaction.atomic():
         session = WorkoutSession.objects.create(
             user=user,
-            title=f"Mai köredzés - {profile['label']}",
+            title=f"Mai edzés - {profile['label']}",
             status=WorkoutSession.Status.PLANNED,
             generation_type=WorkoutSession.GenerationType.GENERATED,
             workout_profile=workout_profile,
+            training_goal=training_goal,
             circuit_rounds=circuit_rounds,
             circuit_exercise_count=circuit_exercise_count,
             planned_duration_minutes=planned_duration_minutes,
@@ -228,6 +270,141 @@ def generate_workout_for_user(
 
     return session
 
+
+
+def replace_session_exercise_for_user(user, session_exercise):
+    """
+    Replaces an unstarted circuit exercise with a similar active exercise.
+
+    Selection priority:
+    1. same movement pattern and same primary muscle group,
+    2. same movement pattern,
+    3. same primary muscle group.
+
+    Exercises already present in the same workout and exercises excluded by
+    the user are not selected. The number of sets and rest time stay unchanged,
+    while reps and target weight are refreshed for the replacement exercise.
+    """
+
+    if session_exercise.session.user_id != user.id:
+        raise ValueError("Ez a gyakorlat nem ehhez a felhasználóhoz tartozik.")
+
+    if session_exercise.block_type != WorkoutSessionExercise.BlockType.CIRCUIT:
+        raise ValueError("Csak a fő edzésblokk gyakorlatai cserélhetők.")
+
+    if session_exercise.set_results.filter(is_completed=True).exists():
+        raise ValueError(
+            "Ez a gyakorlat már elkezdődött, ezért az edzésnapló védelmében nem cserélhető."
+        )
+
+    current_exercise = session_exercise.exercise
+
+    excluded_exercise_ids = _get_excluded_exercise_ids(user)
+    excluded_exercise_ids.update(
+        session_exercise.session.session_exercises.values_list(
+            "exercise_id",
+            flat=True,
+        )
+    )
+
+    recent_exercise_ids = _get_recent_exercise_ids(user)
+
+    primary_muscle_group_ids = list(
+        current_exercise.exercise_muscles
+        .filter(role=ExerciseMuscle.MuscleRole.PRIMARY)
+        .values_list("muscle_group_id", flat=True)
+    )
+
+    base_queryset = (
+        Exercise.objects
+        .filter(is_active=True)
+        .exclude(id__in=excluded_exercise_ids)
+        .exclude(
+            movement_pattern__in=[
+                Exercise.MovementPattern.CARDIO,
+                Exercise.MovementPattern.MOBILITY,
+                Exercise.MovementPattern.STRETCHING,
+            ]
+        )
+        .distinct()
+    )
+
+    replacement = None
+
+    if primary_muscle_group_ids:
+        replacement = _choose_replacement_exercise(
+            base_queryset.filter(
+                movement_pattern=current_exercise.movement_pattern,
+                exercise_muscles__role=ExerciseMuscle.MuscleRole.PRIMARY,
+                exercise_muscles__muscle_group_id__in=primary_muscle_group_ids,
+            ).distinct(),
+            recent_exercise_ids,
+        )
+
+    if not replacement:
+        replacement = _choose_replacement_exercise(
+            base_queryset.filter(
+                movement_pattern=current_exercise.movement_pattern,
+            ),
+            recent_exercise_ids,
+        )
+
+    if not replacement and primary_muscle_group_ids:
+        replacement = _choose_replacement_exercise(
+            base_queryset.filter(
+                exercise_muscles__role=ExerciseMuscle.MuscleRole.PRIMARY,
+                exercise_muscles__muscle_group_id__in=primary_muscle_group_ids,
+            ).distinct(),
+            recent_exercise_ids,
+        )
+
+    if not replacement:
+        raise ValueError("Nem találtam megfelelő cseregyakorlatot.")
+
+    user_profile = UserExerciseProfile.objects.filter(
+        user=user,
+        exercise=replacement,
+    ).first()
+
+    target_weight = None
+    if user_profile:
+        target_weight = (
+            user_profile.preferred_weight_kg
+            or user_profile.last_weight_kg
+            or None
+        )
+
+    with transaction.atomic():
+        session_exercise.exercise = replacement
+        session_exercise.target_reps_min = replacement.default_reps_min
+        session_exercise.target_reps_max = replacement.default_reps_max
+        session_exercise.target_weight_kg = target_weight
+        session_exercise.save(
+            update_fields=[
+                "exercise",
+                "target_reps_min",
+                "target_reps_max",
+                "target_weight_kg",
+            ]
+        )
+
+    return replacement
+
+
+def _choose_replacement_exercise(queryset, recent_exercise_ids):
+    preferred_exercises = list(
+        queryset.exclude(id__in=recent_exercise_ids)
+    )
+
+    if preferred_exercises:
+        return random.choice(preferred_exercises)
+
+    exercises = list(queryset)
+
+    if not exercises:
+        return None
+
+    return random.choice(exercises)
 
 def _clamp_int(value, min_value, max_value, default):
     try:
@@ -328,7 +505,13 @@ def _select_supplementary_exercise(
         .filter(is_active=True)
         .exclude(id__in=excluded_exercise_ids)
         .exclude(id__in=already_selected_ids)
-        .exclude(movement_pattern=Exercise.MovementPattern.CARDIO)
+        .exclude(
+            movement_pattern__in=[
+                Exercise.MovementPattern.CARDIO,
+                Exercise.MovementPattern.MOBILITY,
+                Exercise.MovementPattern.STRETCHING,
+            ]
+        )
         .distinct()
     )
 
