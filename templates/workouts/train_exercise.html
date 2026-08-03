@@ -34,6 +34,10 @@
                     <div class="small text-muted mb-1">
                         {{ round_number }}. kör / {{ total_rounds }}
                     </div>
+                {% elif block_label == "Sorozatok" %}
+                    <div class="small text-muted mb-1">
+                        {{ round_number }}. sorozat / {{ total_rounds }}
+                    </div>
                 {% endif %}
 
                 <h2 class="h4 mb-1">
@@ -73,6 +77,8 @@
                 <h5>
                     {% if block_label == "Köredzés" %}
                         {{ round_number }}. kör eredménye
+                    {% elif block_label == "Sorozatok" %}
+                        {{ round_number }}. sorozat eredménye
                     {% else %}
                         Teljesítés
                     {% endif %}
@@ -120,9 +126,25 @@
         </div>
 
         <div class="d-grid gap-2 mb-4">
-            <button type="submit" class="btn btn-success btn-lg">
+            <button
+                type="submit"
+                name="action"
+                value="save"
+                class="btn btn-success btn-lg">
                 Mentés és tovább
             </button>
+
+            {% if can_replace_exercise %}
+                <button
+                    type="submit"
+                    name="action"
+                    value="replace"
+                    class="btn btn-outline-warning"
+                    formnovalidate
+                    onclick="return confirm('Lecseréljük ezt a gyakorlatot egy hasonlóra?');">
+                    Nem tudom elvégezni – gyakorlat cseréje
+                </button>
+            {% endif %}
 
             <a href="{% url 'workouts:workout_session_detail' session.id %}" class="btn btn-outline-secondary">
                 Vissza az edzéshez
@@ -179,7 +201,15 @@
 
         <div class="card mt-2">
             <div class="card-body">
-                <label class="form-label">Megjegyzés ehhez a körhöz</label>
+                <label class="form-label">
+                    {% if block_label == "Sorozatok" %}
+                        Megjegyzés ehhez a sorozathoz
+                    {% elif block_label == "Köredzés" %}
+                        Megjegyzés ehhez a körhöz
+                    {% else %}
+                        Megjegyzés
+                    {% endif %}
+                </label>
                 <input
                     type="text"
                     name="note"

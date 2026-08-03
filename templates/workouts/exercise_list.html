@@ -11,6 +11,17 @@
             {% csrf_token %}
 
             <div class="mb-3">
+                <label class="form-label">Edzés célja</label>
+                <select name="training_goal" class="form-select">
+                    {% for goal in training_goals %}
+                        <option value="{{ goal.value }}">
+                            {{ goal.label }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="mb-3">
                 <label class="form-label">Edzés típusa</label>
                 <select name="workout_profile" class="form-select">
                     {% for profile in workout_profiles %}

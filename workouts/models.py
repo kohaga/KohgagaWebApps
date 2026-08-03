@@ -41,6 +41,7 @@ class Exercise(models.Model):
         CORE = "core", "Törzs"
         ARMS = "arms", "Kar"
         MOBILITY = "mobility", "Mobilitás"
+        STRETCHING = "stretching", "Nyújtás"
         OTHER = "other", "Egyéb"
 
     name = models.CharField(max_length=150, unique=True)
@@ -217,6 +218,10 @@ class WorkoutSession(models.Model):
         MANUAL = "manual", "Manual"
         GENERATED = "generated", "Generated"
 
+    class TrainingGoal(models.TextChoices):
+        CALORIE_BURN = "calorie_burn", "Kalóriaégetés"
+        MUSCLE_GAIN = "muscle_gain", "Izomtömeg-növelés"
+
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -238,6 +243,12 @@ class WorkoutSession(models.Model):
     workout_profile = models.CharField(
         max_length=50,
         blank=True,
+    )
+
+    training_goal = models.CharField(
+        max_length=20,
+        choices=TrainingGoal.choices,
+        default=TrainingGoal.CALORIE_BURN,
     )
 
     circuit_rounds = models.PositiveSmallIntegerField(

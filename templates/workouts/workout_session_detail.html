@@ -33,8 +33,10 @@
 
             {% if session.actual_duration_seconds %}
                 <p class="mb-1">
-                    <strong>Tényleges idő:</strong>
-                    {{ session.actual_duration_seconds }} mp
+                    {% if actual_duration_minutes is not None %}
+                        <strong>Tényleges idő:</strong>
+                        {{ actual_duration_minutes }} perc
+                    {% endif %}
                 </p>
             {% endif %}
 
