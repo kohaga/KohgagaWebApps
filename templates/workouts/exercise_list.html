@@ -12,7 +12,7 @@
 
             <div class="mb-3">
                 <label class="form-label">Edzés célja</label>
-                <select name="training_goal" class="form-select">
+                <select name="training_goal" id="training_goal" class="form-select">
                     {% for goal in training_goals %}
                         <option value="{{ goal.value }}">
                             {{ goal.label }}
@@ -23,7 +23,7 @@
 
             <div class="mb-3">
                 <label class="form-label">Edzés típusa</label>
-                <select name="workout_profile" class="form-select">
+                <select name="workout_profile" id="workout_profile" class="form-select">
                     {% for profile in workout_profiles %}
                         <option value="{{ profile.value }}">
                             {{ profile.label }}
@@ -35,7 +35,8 @@
             <div class="row g-2">
                 <div class="col-6">
                     <label class="form-label">Körök száma</label>
-                    <select name="circuit_rounds" class="form-select">
+                    <select name="circuit_rounds" id="circuit_rounds" class="form-select">
+                        <option value="1" id="rounds_1" hidden>1 kör</option>
                         <option value="2">2 kör</option>
                         <option value="3" selected>3 kör</option>
                         <option value="4">4 kör</option>
@@ -44,8 +45,9 @@
 
                 <div class="col-6">
                     <label class="form-label">Gyakorlatok száma</label>
-                    <select name="circuit_exercise_count" class="form-select">
-                        <option value="3" selected>3 gyakorlat</option>
+                    <select name="circuit_exercise_count" id="circuit_exercise_count" class="form-select">
+                         <option value="1" id="exercise_count_1" hidden>1 gyakorlat</option>
+                        <option value="3">3 gyakorlat</option>
                         <option value="4">4 gyakorlat</option>
                         <option value="5">5 gyakorlat</option>
                     </select>
@@ -127,4 +129,61 @@
     </details>
 
 </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const trainingGoal = document.getElementById("training_goal");
+    const workoutProfile = document.getElementById("workout_profile");
+    const circuitRounds = document.getElementById("circuit_rounds");
+    const exerciseCount = document.getElementById("circuit_exercise_count");
+    const rounds1 = document.getElementById("rounds_1");
+    const exerciseCount1 = document.getElementById("exercise_count_1");
+
+    function updateWorkoutDefaults() {
+
+        const isAerobic = workoutProfile.value === "aerobic_video";
+
+        if (isAerobic) {
+
+            rounds1.hidden = false;
+            exerciseCount1.hidden = false;
+
+            circuitRounds.value = "1";
+            exerciseCount.value = "1";
+
+            circuitRounds.disabled = true;
+            exerciseCount.disabled = true;
+
+            return;
+        }
+
+        rounds1.hidden = true;
+        exerciseCount1.hidden = true;
+
+        circuitRounds.disabled = false;
+        exerciseCount.disabled = false;
+
+        circuitRounds.value = "3";
+
+        if (
+            trainingGoal && trainingGoal.value === "muscle_gain"
+        ) {
+            exerciseCount.value = "4";
+        } else {
+            exerciseCount.value = "3";
+        }
+    }
+
+    workoutProfile.addEventListener("change", updateWorkoutDefaults);
+
+    if (trainingGoal) {
+        trainingGoal.addEventListener("change", updateWorkoutDefaults);
+    }
+
+    updateWorkoutDefaults();
+
+});
+</script>
+
 {% endblock %}

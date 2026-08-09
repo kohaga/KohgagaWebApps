@@ -85,7 +85,7 @@
                 </h5>
 
                 <div class="row g-2">
-                    <div class="col-4">
+                    <div class="col-6">
                         <label class="form-label">Ism.</label>
                         <input
                             type="number"
@@ -97,7 +97,7 @@
                         >
                     </div>
 
-                    <div class="col-4">
+                    <div class="col-6">
                         <label class="form-label">Kg</label>
                         <input
                             type="text"
@@ -107,20 +107,6 @@
                             value="{{ initial_weight_kg }}"
                         >
                     </div>
-
-                    <div class="col-4">
-                        <label class="form-label">RPE</label>
-                        <input
-                            type="number"
-                            name="rpe"
-                            class="form-control form-control-lg"
-                            min="1"
-                            max="10"
-                            inputmode="numeric"
-                            value="{{ initial_rpe }}"
-                        >
-                    </div>
-
                 </div>
             </div>
         </div>
@@ -154,6 +140,7 @@
     </form>
 
     <details class="mb-3">
+
         <summary class="fw-semibold">Leírás és technikai tippek</summary>
 
         <div class="card mt-2">
@@ -169,7 +156,11 @@
     </details>
 
     {% if session_exercise.exercise.video_url %}
-        <details class="mb-3">
+            {% if session_exercise.exercise.movement_pattern == "aerobic_video" %}
+                <details class="mb-3" open>
+            {% else %}
+                <details class="mb-3">
+            {% endif %}
             <summary class="fw-semibold">Videó megtekintése</summary>
 
             {% if session_exercise.exercise.video_embed_url %}

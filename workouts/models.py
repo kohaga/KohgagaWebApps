@@ -42,6 +42,7 @@ class Exercise(models.Model):
         ARMS = "arms", "Kar"
         MOBILITY = "mobility", "Mobilitás"
         STRETCHING = "stretching", "Nyújtás"
+        AEROBIC_VIDEO = "aerobic_video", "Aerobic videó"
         OTHER = "other", "Egyéb"
 
     name = models.CharField(max_length=150, unique=True)
