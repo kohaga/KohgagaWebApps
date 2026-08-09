@@ -68,6 +68,16 @@ WORKOUT_PROFILES = {
             {"muscle_groups": ["Törzs"]},
         ],
     },
+    "aerobic_video": {
+        "label": "Aerobic videó",
+        "focus": [
+            {
+                "movement_patterns": [
+                    Exercise.MovementPattern.AEROBIC_VIDEO
+                ]
+            },
+        ],
+    },
 }
 
 
@@ -120,6 +130,11 @@ def generate_workout_for_user(
     """
 
     profile = WORKOUT_PROFILES.get(workout_profile, WORKOUT_PROFILES["full_body"])
+    if workout_profile == "aerobic_video":
+        return _generate_aerobic_video_workout(
+            user=user,
+            planned_duration_minutes=planned_duration_minutes,
+        )
 
     valid_training_goals = {
         value for value, _label in WorkoutSession.TrainingGoal.choices
@@ -560,3 +575,50 @@ def _create_session_exercise(
         target_weight_kg=target_weight,
         rest_seconds=rest_seconds,
     )
+
+def _generate_aerobic_video_workout(
+    user,
+    planned_duration_minutes=45,
+):
+    excluded_exercise_ids = _get_excluded_exercise_ids(user)
+    recent_exercise_ids = _get_recent_exercise_ids(user)
+
+    exercise = _select_exercise_by_selector(
+        selector={
+            "movement_patterns": [
+                Exercise.MovementPattern.AEROBIC_VIDEO
+            ]
+        },
+        excluded_exercise_ids=excluded_exercise_ids,
+        recent_exercise_ids=recent_exercise_ids,
+        already_selected_ids=set(),
+    )
+
+    if not exercise:
+        raise ValueError(
+            "Nincs elérhető Aerobic videó az adatbázisban."
+        )
+
+    with transaction.atomic():
+        session = WorkoutSession.objects.create(
+            user=user,
+            title=f"Aerobic - {exercise.name}",
+            status=WorkoutSession.Status.PLANNED,
+            generation_type=WorkoutSession.GenerationType.GENERATED,
+            workout_profile="aerobic_video",
+            circuit_rounds=1,
+            circuit_exercise_count=1,
+            planned_duration_minutes=planned_duration_minutes,
+        )
+
+        _create_session_exercise(
+            session=session,
+            exercise=exercise,
+            position=1,
+            block_type=WorkoutSessionExercise.BlockType.CIRCUIT,
+            target_sets=1,
+            rest_seconds=0,
+            user=user,
+        )
+
+    return session
