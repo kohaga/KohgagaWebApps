@@ -50,6 +50,7 @@ class ExerciseAdmin(admin.ModelAdmin):
         "default_reps_min",
         "default_reps_max",
         "default_rest_seconds",
+        "default_duration_seconds",
         "is_bodyweight",
         "is_active",
     ]
@@ -114,6 +115,8 @@ class WorkoutSessionAdmin(admin.ModelAdmin):
         "workout_profile",
         "circuit_rounds",
         "circuit_exercise_count",
+        "warmup_duration_minutes",
+        "cooldown_duration_minutes",
         "created_at",
         "started_at",
         "finished_at",
@@ -144,6 +147,7 @@ class WorkoutSessionExerciseAdmin(admin.ModelAdmin):
         "target_reps_min",
         "target_reps_max",
         "target_weight_kg",
+        "target_duration_seconds",
         "rest_seconds",
         "is_completed",
     ]
