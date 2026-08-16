@@ -66,6 +66,11 @@ class Exercise(models.Model):
     default_reps_min = models.PositiveSmallIntegerField(default=8)
     default_reps_max = models.PositiveSmallIntegerField(default=12)
     default_rest_seconds = models.PositiveSmallIntegerField(default=90)
+    default_duration_seconds = models.PositiveSmallIntegerField(
+        null=True,
+        blank=True,
+        help_text="Default duration for mobility/stretching/time-based exercises.",
+    )
 
     is_bodyweight = models.BooleanField(default=False)
     is_unilateral = models.BooleanField(
@@ -260,6 +265,9 @@ class WorkoutSession(models.Model):
         default=3,
     )
 
+    warmup_duration_minutes = models.PositiveSmallIntegerField(default=4)
+    cooldown_duration_minutes = models.PositiveSmallIntegerField(default=4)
+
     created_at = models.DateTimeField(auto_now_add=True)
     started_at = models.DateTimeField(null=True, blank=True)
     finished_at = models.DateTimeField(null=True, blank=True)
@@ -312,6 +320,10 @@ class WorkoutSessionExercise(models.Model):
     target_weight_kg = models.DecimalField(
         max_digits=6,
         decimal_places=2,
+        null=True,
+        blank=True,
+    )
+    target_duration_seconds = models.PositiveIntegerField(
         null=True,
         blank=True,
     )
