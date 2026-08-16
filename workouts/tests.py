@@ -70,7 +70,8 @@ class TimedBlockPlanningTests(TestCase):
         )
 
     def test_block_minutes_are_clamped(self):
-        self.assertEqual(parse_block_minutes("0", 4), 1)
+        self.assertEqual(parse_block_minutes("0", 4), 3)
+        self.assertEqual(parse_block_minutes("3", 4), 3)
         self.assertEqual(parse_block_minutes("4", 3), 4)
         self.assertEqual(parse_block_minutes("99", 4), 10)
         self.assertEqual(parse_block_minutes("invalid", 4), 4)
