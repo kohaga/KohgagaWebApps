@@ -3,218 +3,106 @@
 {% block title %}Edzés összesítő{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
+<div class="container mt-2">
 
-    <a href="{% url 'workouts:exercise_list' %}" class="btn btn-secondary mb-3">
-        Vissza
-    </a>
+    <a href="{% url 'workouts:exercise_list' %}" class="btn btn-secondary mb-3">Vissza</a>
 
     <div class="card mb-4">
         <div class="card-body">
-
-            <h1 class="card-title mb-3">
-                {{ session.title }}
-            </h1>
-
-            <p class="mb-1">
-                <strong>Státusz:</strong>
-                {{ session.get_status_display }}
-            </p>
-
-            <p class="mb-1">
-                <strong>Tervezett idő:</strong>
-                {{ session.planned_duration_minutes }} perc
-            </p>
-
-            <p class="mb-1">
-                <strong>Köredzés:</strong>
-                {{ session.circuit_rounds }} kör x {{ session.circuit_exercise_count }} gyakorlat
-            </p>
-
+            <h1 class="card-title mb-3">{{ session.title }}</h1>
+            <p class="mb-1"><strong>Státusz:</strong> {{ session.get_status_display }}</p>
+            <p class="mb-1"><strong>Tervezett idő:</strong> {{ session.planned_duration_minutes }} perc</p>
+            <p class="mb-1"><strong>Köredzés:</strong> {{ session.circuit_rounds }} kör x {{ session.circuit_exercise_count }} gyakorlat</p>
             {% if session.training_goal == "muscle_gain" %}
-                <p class="mb-1">
-                    <strong>Bemelegítés / nyújtás:</strong>
-                    {{ session.warmup_duration_minutes }} / {{ session.cooldown_duration_minutes }} perc
-                </p>
+                <p class="mb-1"><strong>Bemelegítés / nyújtás:</strong> {{ session.warmup_duration_minutes }} / {{ session.cooldown_duration_minutes }} perc</p>
             {% endif %}
-
-            {% if session.actual_duration_seconds %}
-                <p class="mb-1">
-                    {% if actual_duration_minutes is not None %}
-                        <strong>Tényleges idő:</strong>
-                        {{ actual_duration_minutes }} perc
-                    {% endif %}
-                </p>
+            {% if session.actual_duration_seconds and actual_duration_minutes is not None %}
+                <p class="mb-1"><strong>Tényleges idő:</strong> {{ actual_duration_minutes }} perc</p>
             {% endif %}
-
-            <p class="mb-3">
-                <strong>Haladás:</strong>
-                {{ completed_steps }} / {{ total_steps }} lépés
-            </p>
+            <p class="mb-3"><strong>Haladás:</strong> {{ completed_steps }} / {{ total_steps }} lépés</p>
 
             <div class="progress mb-3" style="height: 8px;">
-                <div
-                    class="progress-bar"
-                    role="progressbar"
-                    style="width: {{ progress_percent }}%;"
-                    aria-valuenow="{{ progress_percent }}"
-                    aria-valuemin="0"
-                    aria-valuemax="100">
-                </div>
+                <div class="progress-bar" role="progressbar" style="width: {{ progress_percent }}%;" aria-valuenow="{{ progress_percent }}" aria-valuemin="0" aria-valuemax="100"></div>
             </div>
 
             <div class="d-flex gap-2 flex-wrap">
-
                 {% if session.status == "planned" %}
                     <form method="post" action="{% url 'workouts:start_workout' session.id %}">
                         {% csrf_token %}
-                        <button type="submit" class="btn btn-success">
-                            Edzés indítása
-                        </button>
+                        <button type="submit" class="btn btn-success">Edzés indítása</button>
                     </form>
                 {% endif %}
-
                 {% if session.status == "in_progress" %}
-                    <a href="{% url 'workouts:train_workout' session.id %}" class="btn btn-success">
-                        Edzés folytatása
-                    </a>
-
+                    <a href="{% url 'workouts:train_workout' session.id %}" class="btn btn-success">Edzés folytatása</a>
                     <form method="post" action="{% url 'workouts:finish_workout' session.id %}">
                         {% csrf_token %}
-                        <button type="submit" class="btn btn-primary">
-                            Edzés lezárása
-                        </button>
+                        <button type="submit" class="btn btn-primary">Edzés lezárása</button>
                     </form>
                 {% endif %}
-
                 {% if session.status != "completed" %}
-                    <form
-                        method="post"
-                        action="{% url 'workouts:delete_workout_session' session.id %}"
-                        onsubmit="return confirm('Biztosan törlöd ezt az edzést? A hozzá tartozó gyakorlat- és eredményadatok is törlődnek.');"
-                    >
+                    <form method="post" action="{% url 'workouts:delete_workout_session' session.id %}" onsubmit="return confirm('Biztosan törlöd ezt az edzést? A hozzá tartozó gyakorlat- és eredményadatok is törlődnek.');">
                         {% csrf_token %}
-                        <button type="submit" class="btn btn-outline-danger">
-                            Edzés törlése
-                        </button>
+                        <button type="submit" class="btn btn-outline-danger">Edzés törlése</button>
                     </form>
                 {% endif %}
-
             </div>
-
         </div>
     </div>
 
     {% if warmup_rows %}
         <h2 class="h4 mb-3">Bemelegítés</h2>
-
-        {% for row in warmup_rows %}
-            <div class="card mb-3">
-                <div class="card-body">
-
-                    <h3 class="h5 mb-2">
-                        {{ row.item.exercise.name }}
-                    </h3>
-
-                    <p class="mb-2">
-                        <strong>Cél:</strong>
-                        {% if row.item.target_duration_seconds %}
-                            {{ row.item.target_duration_seconds }} mp
-                        {% else %}
-                            {{ row.item.target_reps_min }}-{{ row.item.target_reps_max }}
-                            {% if row.item.target_weight_kg %}
-                                / {{ row.item.target_weight_kg }} kg
-                            {% endif %}
-                        {% endif %}
-                    </p>
-
-                    {% for round in row.round_rows %}
-                        {% if round.result %}
-                            <div class="alert alert-success mb-0">
-                                Kész.
-                            </div>
-                        {% else %}
-                            <div class="alert alert-warning mb-0">
-                                Még nincs rögzítve.
-                            </div>
-                        {% endif %}
-                    {% endfor %}
-
+        <div class="card mb-4">
+            <div class="card-body py-2">
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle mb-0">
+                        <thead><tr><th>Gyakorlat</th><th>Cél</th><th>Állapot</th></tr></thead>
+                        <tbody>
+                            {% for row in warmup_rows %}
+                                <tr>
+                                    <td><strong>{{ row.item.exercise.name }}</strong></td>
+                                    <td>{% if row.item.target_duration_seconds %}{{ row.item.target_duration_seconds }} mp{% else %}{{ row.item.target_reps_min }}-{{ row.item.target_reps_max }}{% endif %}</td>
+                                    <td>{% if row.round_rows.0.result %}<span class="badge text-bg-success">kész</span>{% else %}<span class="badge text-bg-warning">nyitott</span>{% endif %}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
             </div>
-        {% endfor %}
+        </div>
     {% endif %}
 
     {% if circuit_rows %}
-        <h2 class="h4 mt-4 mb-3">
-            Köredzés
-            {% if circuit_rounds %}
-                <span class="text-muted">— {{ circuit_rounds }} kör</span>
-            {% endif %}
-        </h2>
-
+        <h2 class="h4 mt-4 mb-3">Köredzés{% if circuit_rounds %} <span class="text-muted">— {{ circuit_rounds }} kör</span>{% endif %}</h2>
         <div class="card mb-4">
-            <div class="card-body">
-
+            <div class="card-body py-2">
                 <div class="table-responsive">
-                    <table class="table table-sm align-middle">
+                    <table class="table table-sm align-middle mb-0">
                         <thead>
                             <tr>
                                 <th>Gyakorlat</th>
-                                {% for round in circuit_rows.0.round_rows %}
-                                    <th>{{ round.round_number }}. kör</th>
-                                {% endfor %}
+                                {% for round in circuit_rows.0.round_rows %}<th>{{ round.round_number }}. kör</th>{% endfor %}
                             </tr>
                         </thead>
-
                         <tbody>
                             {% for row in circuit_rows %}
                                 <tr>
                                     <td>
-                                        <strong>{{ row.item.exercise.name }}</strong>
-                                        <br>
-                                        <span class="small text-muted">
-                                            Cél:
-                                            {{ row.item.target_reps_min }}-{{ row.item.target_reps_max }}
-                                            {% if row.item.target_weight_kg %}
-                                                / {{ row.item.target_weight_kg }} kg
-                                            {% endif %}
-                                        </span>
-
+                                        <strong>{{ row.item.exercise.name }}</strong><br>
+                                        <span class="small text-muted">Cél: {{ row.item.target_reps_min }}-{{ row.item.target_reps_max }}{% if row.item.target_weight_kg %} / {{ row.item.target_weight_kg }} kg{% endif %}</span>
                                         {% if session.status == "planned" %}
-                                            <form
-                                                method="post"
-                                                action="{% url 'workouts:replace_planned_exercise' session.id row.item.id %}"
-                                                class="mt-2"
-                                            >
+                                            <form method="post" action="{% url 'workouts:replace_planned_exercise' session.id row.item.id %}" class="mt-1">
                                                 {% csrf_token %}
-                                                <button type="submit" class="btn btn-sm btn-outline-secondary">
-                                                    Gyakorlat cseréje
-                                                </button>
+                                                <button type="submit" class="btn btn-sm btn-outline-secondary w-100 py-0">Csere</button>
                                             </form>
                                         {% endif %}
                                     </td>
-
                                     {% for round in row.round_rows %}
                                         <td>
                                             {% if round.result %}
-                                                <span class="badge text-bg-success">
-                                                    kész
-                                                </span>
-                                                <br>
-                                                <span class="small">
-                                                    {{ round.result.reps|default:"-" }} ism.
-                                                    {% if round.result.weight_kg %}
-                                                        <br>{{ round.result.weight_kg }} kg
-                                                    {% endif %}
-                                                    {% if round.result.rpe %}
-                                                        <br>RPE {{ round.result.rpe }}
-                                                    {% endif %}
-                                                </span>
+                                                <span class="badge text-bg-success">kész</span><br>
+                                                <span class="small">{{ round.result.reps|default:"-" }} ism.{% if round.result.weight_kg %}<br>{{ round.result.weight_kg }} kg{% endif %}{% if round.result.rpe %}<br>RPE {{ round.result.rpe }}{% endif %}</span>
                                             {% else %}
-                                                <span class="badge text-bg-warning">
-                                                    nyitott
-                                                </span>
+                                                <span class="badge text-bg-warning">nyitott</span>
                                             {% endif %}
                                         </td>
                                     {% endfor %}
@@ -223,49 +111,30 @@
                         </tbody>
                     </table>
                 </div>
-
             </div>
         </div>
     {% endif %}
 
     {% if cooldown_rows %}
         <h2 class="h4 mt-4 mb-3">Nyújtás</h2>
-
-        {% for row in cooldown_rows %}
-            <div class="card mb-3">
-                <div class="card-body">
-
-                    <h3 class="h5 mb-2">
-                        {{ row.item.exercise.name }}
-                    </h3>
-
-                    <p class="mb-2">
-                        <strong>Cél:</strong>
-                        {% if row.item.target_duration_seconds %}
-                            {{ row.item.target_duration_seconds }} mp
-                        {% else %}
-                            {{ row.item.target_reps_min }}-{{ row.item.target_reps_max }}
-                            {% if row.item.target_weight_kg %}
-                                / {{ row.item.target_weight_kg }} kg
-                            {% endif %}
-                        {% endif %}
-                    </p>
-
-                    {% for round in row.round_rows %}
-                        {% if round.result %}
-                            <div class="alert alert-success mb-0">
-                                Kész.
-                            </div>
-                        {% else %}
-                            <div class="alert alert-warning mb-0">
-                                Még nincs rögzítve.
-                            </div>
-                        {% endif %}
-                    {% endfor %}
-
+        <div class="card mb-4">
+            <div class="card-body py-2">
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle mb-0">
+                        <thead><tr><th>Gyakorlat</th><th>Cél</th><th>Állapot</th></tr></thead>
+                        <tbody>
+                            {% for row in cooldown_rows %}
+                                <tr>
+                                    <td><strong>{{ row.item.exercise.name }}</strong></td>
+                                    <td>{% if row.item.target_duration_seconds %}{{ row.item.target_duration_seconds }} mp{% else %}{{ row.item.target_reps_min }}-{{ row.item.target_reps_max }}{% endif %}</td>
+                                    <td>{% if row.round_rows.0.result %}<span class="badge text-bg-success">kész</span>{% else %}<span class="badge text-bg-warning">nyitott</span>{% endif %}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
             </div>
-        {% endfor %}
+        </div>
     {% endif %}
 
 </div>
