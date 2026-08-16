@@ -46,10 +46,14 @@
 
                 <div class="small text-muted">
                     Cél:
-                    {{ session_exercise.target_reps_min }}-{{ session_exercise.target_reps_max }}
+                    {% if session_exercise.target_duration_seconds %}
+                        {{ session_exercise.target_duration_seconds }} mp
+                    {% else %}
+                        {{ session_exercise.target_reps_min }}-{{ session_exercise.target_reps_max }}
 
-                    {% if session_exercise.target_weight_kg %}
-                        / {{ session_exercise.target_weight_kg }} kg
+                        {% if session_exercise.target_weight_kg %}
+                            / {{ session_exercise.target_weight_kg }} kg
+                        {% endif %}
                     {% endif %}
                 </div>
 
@@ -60,56 +64,71 @@
     <div class="card mb-3 text-center">
         <div class="card-body">
             <div class="text-muted mb-1">
-                Gyakorlat ideje
+                {% if session_exercise.target_duration_seconds %}
+                    Hátralévő idő
+                {% else %}
+                    Gyakorlat ideje
+                {% endif %}
             </div>
 
-            <div id="work-timer" class="display-4 fw-bold">
+            <div
+                id="work-timer"
+                class="display-4 fw-bold"
+                data-target-seconds="{{ session_exercise.target_duration_seconds|default:0 }}">
                 00:00
             </div>
+
+            {% if session_exercise.target_duration_seconds %}
+                <div id="timer-complete" class="small text-success fw-semibold mt-2" hidden>
+                    Célidő teljesítve.
+                </div>
+            {% endif %}
         </div>
     </div>
 
     <form method="post">
         {% csrf_token %}
 
-        <div class="card mb-3">
-            <div class="card-body">
-                <h5>
-                    {% if block_label == "Köredzés" %}
-                        {{ round_number }}. kör eredménye
-                    {% elif block_label == "Sorozatok" %}
-                        {{ round_number }}. sorozat eredménye
-                    {% else %}
-                        Teljesítés
-                    {% endif %}
-                </h5>
+        {% if not session_exercise.target_duration_seconds %}
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5>
+                        {% if block_label == "Köredzés" %}
+                            {{ round_number }}. kör eredménye
+                        {% elif block_label == "Sorozatok" %}
+                            {{ round_number }}. sorozat eredménye
+                        {% else %}
+                            Teljesítés
+                        {% endif %}
+                    </h5>
 
-                <div class="row g-2">
-                    <div class="col-6">
-                        <label class="form-label">Ism.</label>
-                        <input
-                            type="number"
-                            name="reps"
-                            class="form-control form-control-lg"
-                            min="0"
-                            inputmode="numeric"
-                            value="{{ initial_reps }}"
-                        >
-                    </div>
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <label class="form-label">Ism.</label>
+                            <input
+                                type="number"
+                                name="reps"
+                                class="form-control form-control-lg"
+                                min="0"
+                                inputmode="numeric"
+                                value="{{ initial_reps }}"
+                            >
+                        </div>
 
-                    <div class="col-6">
-                        <label class="form-label">Kg</label>
-                        <input
-                            type="text"
-                            name="weight"
-                            class="form-control form-control-lg"
-                            inputmode="decimal"
-                            value="{{ initial_weight_kg }}"
-                        >
+                        <div class="col-6">
+                            <label class="form-label">Kg</label>
+                            <input
+                                type="text"
+                                name="weight"
+                                class="form-control form-control-lg"
+                                inputmode="decimal"
+                                value="{{ initial_weight_kg }}"
+                            >
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+        {% endif %}
 
         <div class="d-grid gap-2 mb-4">
             <button
@@ -117,7 +136,11 @@
                 name="action"
                 value="save"
                 class="btn btn-success btn-lg">
-                Mentés és tovább
+                {% if session_exercise.target_duration_seconds %}
+                    Kész, tovább
+                {% else %}
+                    Mentés és tovább
+                {% endif %}
             </button>
 
             {% if can_replace_exercise %}
@@ -222,14 +245,28 @@
             return;
         }
 
+        const targetSeconds = Number(timerElement.dataset.targetSeconds || 0);
+        const completeElement = document.getElementById("timer-complete");
         let elapsedSeconds = 0;
 
-        function renderTimer() {
-            const minutes = Math.floor(elapsedSeconds / 60);
-            const seconds = elapsedSeconds % 60;
+        function formatTime(totalSeconds) {
+            const minutes = Math.floor(totalSeconds / 60);
+            const seconds = totalSeconds % 60;
 
-            timerElement.textContent =
-                String(minutes).padStart(2, "0") + ":" + String(seconds).padStart(2, "0");
+            return String(minutes).padStart(2, "0") + ":" + String(seconds).padStart(2, "0");
+        }
+
+        function renderTimer() {
+            if (targetSeconds > 0) {
+                const remainingSeconds = Math.max(targetSeconds - elapsedSeconds, 0);
+                timerElement.textContent = formatTime(remainingSeconds);
+
+                if (remainingSeconds === 0 && completeElement) {
+                    completeElement.hidden = false;
+                }
+            } else {
+                timerElement.textContent = formatTime(elapsedSeconds);
+            }
         }
 
         renderTimer();
