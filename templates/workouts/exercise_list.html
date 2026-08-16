@@ -48,11 +48,38 @@
                 <div class="col-6">
                     <label class="form-label">Gyakorlatok száma</label>
                     <select name="circuit_exercise_count" id="circuit_exercise_count" class="form-select">
-                         <option value="1" id="exercise_count_1" hidden>1 gyakorlat</option>
+                        <option value="1" id="exercise_count_1" hidden>1 gyakorlat</option>
                         <option value="3">3 gyakorlat</option>
                         <option value="4">4 gyakorlat</option>
                         <option value="5">5 gyakorlat</option>
                     </select>
+                </div>
+            </div>
+
+            <div class="row g-2 mt-1" id="timed_block_settings">
+                <div class="col-6">
+                    <label class="form-label">Bemelegítés</label>
+                    <select name="warmup_duration_minutes" id="warmup_duration_minutes" class="form-select">
+                        {% for minute in "123456789" %}
+                            <option value="{{ minute }}"{% if minute == "4" %} selected{% endif %}>{{ minute }} perc</option>
+                        {% endfor %}
+                        <option value="10">10 perc</option>
+                    </select>
+                </div>
+
+                <div class="col-6">
+                    <label class="form-label">Nyújtás</label>
+                    <select name="cooldown_duration_minutes" id="cooldown_duration_minutes" class="form-select">
+                        {% for minute in "123456789" %}
+                            <option value="{{ minute }}"{% if minute == "4" %} selected{% endif %}>{{ minute }} perc</option>
+                        {% endfor %}
+                        <option value="10">10 perc</option>
+                    </select>
+                </div>
+                <div class="col-12">
+                    <div class="form-text">
+                        Izomtömeg-növelésnél a rendszer a fő gyakorlatok izomcsoportjaihoz választ mobilizáló és nyújtó gyakorlatokat a megadott időkeretben.
+                    </div>
                 </div>
             </div>
 
@@ -95,8 +122,12 @@
 
                             <p class="mb-2">
                                 <strong>Alap cél:</strong>
-                                {{ exercise.default_sets }} x
-                                {{ exercise.default_reps_min }}-{{ exercise.default_reps_max }}
+                                {% if exercise.default_duration_seconds %}
+                                    {{ exercise.default_duration_seconds }} mp
+                                {% else %}
+                                    {{ exercise.default_sets }} x
+                                    {{ exercise.default_reps_min }}-{{ exercise.default_reps_max }}
+                                {% endif %}
                             </p>
 
                             <p class="mb-2">
@@ -141,10 +172,18 @@ document.addEventListener("DOMContentLoaded", function () {
     const exerciseCount = document.getElementById("circuit_exercise_count");
     const rounds1 = document.getElementById("rounds_1");
     const exerciseCount1 = document.getElementById("exercise_count_1");
+    const timedBlockSettings = document.getElementById("timed_block_settings");
+    const warmupDuration = document.getElementById("warmup_duration_minutes");
+    const cooldownDuration = document.getElementById("cooldown_duration_minutes");
 
     function updateWorkoutDefaults() {
 
         const isAerobic = workoutProfile.value === "aerobic_video";
+        const isMuscleGain = trainingGoal && trainingGoal.value === "muscle_gain";
+
+        timedBlockSettings.hidden = isAerobic || !isMuscleGain;
+        warmupDuration.disabled = isAerobic || !isMuscleGain;
+        cooldownDuration.disabled = isAerobic || !isMuscleGain;
 
         if (isAerobic) {
 
@@ -168,9 +207,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         circuitRounds.value = "3";
 
-        if (
-            trainingGoal && trainingGoal.value === "muscle_gain"
-        ) {
+        if (isMuscleGain) {
             exerciseCount.value = "4";
         } else {
             exerciseCount.value = "3";
