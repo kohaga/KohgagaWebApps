@@ -1,6 +1,6 @@
 from django.urls import path
 
-from . import planning_views, views
+from . import generation_views, planning_views, views
 
 app_name = "workouts"
 
@@ -9,7 +9,7 @@ urlpatterns = [
     path("history/", views.workout_history, name="workout_history"),
     path("exercises/<int:exercise_id>/", views.exercise_detail, name="exercise_detail"),
 
-    path("generate/", views.generate_workout, name="generate_workout"),
+    path("generate/", generation_views.generate_workout, name="generate_workout"),
     path("sessions/<int:session_id>/", views.workout_session_detail, name="workout_session_detail"),
     path("sessions/<int:session_id>/start/", views.start_workout, name="start_workout"),
     path("sessions/<int:session_id>/finish/", views.finish_workout, name="finish_workout"),
