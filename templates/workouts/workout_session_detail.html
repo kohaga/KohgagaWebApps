@@ -176,6 +176,19 @@
                                                 / {{ row.item.target_weight_kg }} kg
                                             {% endif %}
                                         </span>
+
+                                        {% if session.status == "planned" %}
+                                            <form
+                                                method="post"
+                                                action="{% url 'workouts:replace_planned_exercise' session.id row.item.id %}"
+                                                class="mt-2"
+                                            >
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-sm btn-outline-secondary">
+                                                    Gyakorlat cseréje
+                                                </button>
+                                            </form>
+                                        {% endif %}
                                     </td>
 
                                     {% for round in row.round_rows %}
