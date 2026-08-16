@@ -1,6 +1,8 @@
 {% extends "base.html" %}
+{% load workout_tags %}
 
 {% block content %}
+{% last_training_goal request.user as default_training_goal %}
 <div class="container mt-4">
 
 <div class="card mb-4">
@@ -14,7 +16,7 @@
                 <label class="form-label">Edzés célja</label>
                 <select name="training_goal" id="training_goal" class="form-select">
                     {% for goal in training_goals %}
-                        <option value="{{ goal.value }}">
+                        <option value="{{ goal.value }}"{% if goal.value == default_training_goal %} selected{% endif %}>
                             {{ goal.label }}
                         </option>
                     {% endfor %}
