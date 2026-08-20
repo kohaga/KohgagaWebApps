@@ -15,7 +15,8 @@
         font-weight: 600;
     }
     .dart-multiplier-grid,
-    .dart-special-grid {
+    .dart-special-grid,
+    .finish-grid {
         display: grid;
         grid-template-columns: repeat(3, minmax(0, 1fr));
         gap: .5rem;
@@ -24,6 +25,18 @@
     .dart-special-btn {
         min-height: 48px;
         font-weight: 600;
+    }
+    .finish-box {
+        min-height: 46px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid var(--bs-success-border-subtle);
+        border-radius: .5rem;
+        background: var(--bs-success-bg-subtle);
+        color: var(--bs-success-text-emphasis);
+        font-size: 1.05rem;
+        font-weight: 700;
     }
     .multiplier-active {
         box-shadow: 0 0 0 .2rem rgba(13, 110, 253, .2);
@@ -36,7 +49,8 @@
             padding-right: .25rem;
         }
         .dart-multiplier-grid,
-        .dart-special-grid { gap: .4rem; }
+        .dart-special-grid,
+        .finish-grid { gap: .4rem; }
     }
 </style>
 
@@ -102,13 +116,11 @@
                 {% endfor %}
             </div>
 
-            {% if finish_suggestion %}
-                <div class="alert alert-success py-2 px-3 mb-3">
-                    <strong>Kiszálló:</strong> {{ finish_suggestion|join:" → " }}
-                </div>
-            {% else %}
-                <div class="small text-muted mb-3">
-                    Nincs kiszálló javaslat {{ darts_left }} dartból.
+            {% if finish_options %}
+                <div class="finish-grid mb-3">
+                    {% for option in finish_options %}
+                        <div class="finish-box">{{ option }}</div>
+                    {% endfor %}
                 </div>
             {% endif %}
 
