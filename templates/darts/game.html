@@ -1,59 +1,11 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}{{ game.game_type }} darts{% endblock %}
 
 {% block content %}
-<style>
-    .dart-number-grid {
-        display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-        gap: .55rem;
-    }
-    .dart-number-btn {
-        min-height: 58px;
-        font-size: 1.25rem;
-        font-weight: 600;
-    }
-    .dart-multiplier-grid,
-    .dart-special-grid,
-    .finish-grid {
-        display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: .5rem;
-    }
-    .dart-multiplier-btn,
-    .dart-special-btn {
-        min-height: 48px;
-        font-weight: 600;
-    }
-    .finish-box {
-        min-height: 46px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border: 1px solid var(--bs-success-border-subtle);
-        border-radius: .5rem;
-        background: var(--bs-success-bg-subtle);
-        color: var(--bs-success-text-emphasis);
-        font-size: 1.05rem;
-        font-weight: 700;
-    }
-    .multiplier-active {
-        box-shadow: 0 0 0 .2rem rgba(13, 110, 253, .2);
-    }
-    @media (max-width: 575.98px) {
-        .dart-number-grid { gap: .4rem; }
-        .dart-number-btn {
-            min-height: 54px;
-            padding-left: .25rem;
-            padding-right: .25rem;
-        }
-        .dart-multiplier-grid,
-        .dart-special-grid,
-        .finish-grid { gap: .4rem; }
-    }
-</style>
-
+<link rel="stylesheet" href="{% static 'darts/darts.css' %}">
+<div class="darts-page">
 <div class="d-flex justify-content-between align-items-center mb-3">
     <div>
         <h1 class="h4 mb-0">{{ game.game_type }} · {{ game.get_checkout_mode_display }}</h1>
@@ -65,7 +17,7 @@
 <div class="row g-2 mb-3">
     {% for row in scoreboard_rows %}
         <div class="col-6 col-lg-3">
-            <div class="card h-100 {% if current_game_player and current_game_player.id == row.game_player.id %}border-primary border-2{% endif %}">
+            <div class="card dart-player-card h-100 {% if current_game_player and current_game_player.id == row.game_player.id %}is-active{% endif %}">
                 <div class="card-body p-2 text-center">
                     <div class="fw-semibold text-truncate">{{ row.game_player.player.name }}</div>
                     <div class="display-6 fw-bold">{{ row.game_player.current_score }}</div>
@@ -97,7 +49,7 @@
         </div>
     </div>
 {% else %}
-    <div class="card shadow-sm">
+    <div class="card shadow-sm dart-input-card">
         <div class="card-body">
             <div class="d-flex justify-content-between align-items-center gap-2 mb-1">
                 <div class="text-truncate">
@@ -138,7 +90,7 @@
                 <div class="dart-number-grid mb-3">
                     {% for number in number_buttons %}
                         {% if number != 0 %}
-                            <button type="button" class="btn btn-outline-dark dart-number-btn segment-btn" data-segment="{{ number }}">
+                            <button type="button" class="btn dart-number-btn segment-btn" data-segment="{{ number }}">
                                 {{ number }}
                             </button>
                         {% endif %}
@@ -146,9 +98,9 @@
                 </div>
 
                 <div class="dart-special-grid mb-3">
-                    <button type="button" class="btn btn-outline-secondary dart-special-btn direct-dart-btn" data-segment="0" data-multiplier="1">MISS</button>
-                    <button type="button" class="btn btn-outline-success dart-special-btn direct-dart-btn" data-segment="25" data-multiplier="1">25</button>
-                    <button type="button" class="btn btn-success dart-special-btn direct-dart-btn" data-segment="25" data-multiplier="2">BULL 50</button>
+                    <button type="button" class="btn dart-special-btn dart-special-miss direct-dart-btn" data-segment="0" data-multiplier="1">MISS</button>
+                    <button type="button" class="btn dart-special-btn dart-special-25 direct-dart-btn" data-segment="25" data-multiplier="1">25</button>
+                    <button type="button" class="btn dart-special-btn dart-special-bull direct-dart-btn" data-segment="25" data-multiplier="2">BULL 50</button>
                 </div>
             </form>
 
@@ -199,4 +151,5 @@
 })();
 </script>
 {% endif %}
+</div>
 {% endblock %}
