@@ -1,47 +1,100 @@
 {% extends "base.html" %}
 
-{% block title %}Kezdőlap | KOHAGA Web Apps{% endblock %}
+{% block title %}Kezdőlap | Learning Portal{% endblock %}
 
 {% block content %}
+
 <div class="mb-4">
     <h1 class="h3 mb-1">Szia, {{ request.user.username }}!</h1>
-    <p class="text-muted mb-0">Válassz alkalmazást a napi rutin indításához.</p>
+    <p class="text-muted mb-0">
+        Válassz alkalmazást a napi rutin indításához.
+    </p>
 </div>
 
 <div class="row g-3">
-    <div class="col-12 col-md-6 col-lg-4">
+
+    <div class="col-12 col-md-6">
         <div class="card shadow-sm h-100">
-            <div class="card-body d-flex flex-column">
+            <div class="card-body">
                 <h2 class="h5 card-title">Nyelvtanulás</h2>
-                <p class="card-text text-muted">Szókártyás gyakorlás, paklik, feleletválasztós feladatok és gyakorlási eredmények.</p>
-                <div class="mt-auto"><a href="{% url 'vocabulary:home' %}" class="btn btn-primary">Megnyitás</a></div>
+                    <p class="card-text text-muted">
+                        Szókártyás gyakorlás, paklik, feleletválasztós feladatok
+                        és gyakorlási eredmények.
+                    </p>
+                <a href="{% url 'vocabulary:home' %}" class="btn btn-primary">
+                    Megnyitás
+                </a>
             </div>
         </div>
     </div>
 
-    <div class="col-12 col-md-6 col-lg-4">
+    <div class="col-12 col-md-6">
         <div class="card shadow-sm h-100">
             <div class="card-body d-flex flex-column">
-                <h2 class="h5">Edzés</h2>
-                <p class="text-muted">Köredzés generálás, mobilos edzésflow, pihenőidőzítő, videós gyakorlatleírások és edzéstörténet.</p>
+
+                <h2>Edzés</h2>
+
+                <p>
+                    Köredzés generálás, mobilos edzésflow, pihenőidőzítő,
+                    videós gyakorlatleírások és edzéstörténet.
+                </p>
+
                 <div class="mb-3">
-                    <div class="d-flex justify-content-between align-items-center mb-1"><strong>Level {{ workout_xp.level }}</strong><strong>{{ workout_xp.total_xp }} XP</strong></div>
-                    <div class="progress" style="height: 10px;"><div class="progress-bar" role="progressbar" style="width: {{ workout_xp.progress_percent }}%;" aria-valuenow="{{ workout_xp.progress_percent }}" aria-valuemin="0" aria-valuemax="100"></div></div>
-                    <div class="small text-muted mt-1">Még {{ workout_xp.xp_to_next_level }} XP a következő szintig</div>
+
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <strong>
+                            Level {{ workout_xp.level }}
+                        </strong>
+
+                        <strong>
+                            {{ workout_xp.total_xp }} XP
+                        </strong>
+                    </div>
+
+                    <div class="progress" style="height: 10px;">
+                        <div
+                            class="progress-bar"
+                            role="progressbar"
+                            style="width: {{ workout_xp.progress_percent }}%;"
+                            aria-valuenow="{{ workout_xp.progress_percent }}"
+                            aria-valuemin="0"
+                            aria-valuemax="100">
+                        </div>
+                    </div>
+
+                    <div class="small text-muted mt-1">
+                        Még {{ workout_xp.xp_to_next_level }} XP a következő szintig
+                    </div>
+
                 </div>
-                <div class="mt-auto"><a href="{% url 'workouts:exercise_list' %}" class="btn btn-primary">Megnyitás</a></div>
+
+                <div class="mt-auto">
+                    <a href="{% url 'workouts:exercise_list' %}"
+                       class="btn btn-primary">
+                        Megnyitás
+                    </a>
+                </div>
+
             </div>
         </div>
     </div>
 
-    <div class="col-12 col-md-6 col-lg-4">
+    <div class="col-12 col-md-6">
         <div class="card shadow-sm h-100">
             <div class="card-body d-flex flex-column">
-                <h2 class="h5">Darts</h2>
-                <p class="text-muted">301/501 játék, automatikus pontszámítás, kiszálló-javaslatok és játékos statisztikák.</p>
-                <div class="mt-auto"><a href="{% url 'darts:dashboard' %}" class="btn btn-primary">Megnyitás</a></div>
+                <h2 class="h5 card-title">Darts</h2>
+                <p class="card-text text-muted">
+                    301/501 pontszámítás, kiszálló javaslatok, játékosok és fejlődési statisztikák.
+                </p>
+                <div class="mt-auto">
+                    <a href="{% url 'darts:dashboard' %}" class="btn btn-primary">
+                        Megnyitás
+                    </a>
+                </div>
             </div>
         </div>
     </div>
+
 </div>
+
 {% endblock %}

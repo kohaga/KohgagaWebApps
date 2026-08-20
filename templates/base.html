@@ -5,49 +5,91 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block title %}KOHAGA Web Apps{% endblock %}</title>
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="{% static 'css/app.css' %}" rel="stylesheet">
 </head>
+
 <body class="bg-light">
+
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container">
-        <a class="navbar-brand fw-semibold" href="{% url 'core:home' %}">KOHAGA Web Apps</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar" aria-controls="mainNavbar" aria-expanded="false" aria-label="Menü megnyitása">
+
+        <a class="navbar-brand fw-semibold" href="{% url 'core:home' %}">
+            KOHAGA Web Apps
+        </a>
+
+        <button
+            class="navbar-toggler"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#mainNavbar"
+            aria-controls="mainNavbar"
+            aria-expanded="false"
+            aria-label="Menü megnyitása">
             <span class="navbar-toggler-icon"></span>
         </button>
+
         <div class="collapse navbar-collapse" id="mainNavbar">
+
             {% if request.user.is_authenticated %}
                 <div class="navbar-nav me-auto mt-2 mt-lg-0">
-                    <a class="nav-link" href="{% url 'core:home' %}">Főoldal</a>
-                    <a class="nav-link" href="{% url 'vocabulary:home' %}">Nyelvtanulás</a>
-                    <a class="nav-link" href="{% url 'workouts:exercise_list' %}">Edzés</a>
-                    <a class="nav-link" href="{% url 'darts:dashboard' %}">Darts</a>
+                    <a class="nav-link" href="{% url 'core:home' %}">
+                        Főoldal
+                    </a>
+                    <a class="nav-link" href="{% url 'vocabulary:home' %}">
+                        Nyelvtanulás
+                    </a>
+                    <a class="nav-link" href="{% url 'workouts:exercise_list' %}">
+                        Edzés
+                    </a>
+                    <a class="nav-link" href="{% url 'darts:dashboard' %}">
+                        Darts
+                    </a>
                 </div>
             {% else %}
                 <div class="me-auto"></div>
             {% endif %}
+
             <div class="d-flex align-items-center gap-2 mt-3 mt-lg-0">
                 {% if request.user.is_authenticated %}
-                    <span class="navbar-text small d-none d-sm-inline">{{ request.user.username }}</span>
+                    <span class="navbar-text small d-none d-sm-inline">
+                        {{ request.user.username }}
+                    </span>
+
                     <form method="post" action="{% url 'core:logout' %}" class="m-0">
                         {% csrf_token %}
-                        <button type="submit" class="btn btn-outline-light btn-sm">Kilépés</button>
+                        <button type="submit" class="btn btn-outline-light btn-sm">
+                            Kilépés
+                        </button>
                     </form>
                 {% else %}
-                    <a href="{% url 'core:login' %}" class="btn btn-outline-light btn-sm">Belépés</a>
+                    <a href="{% url 'core:login' %}" class="btn btn-outline-light btn-sm">
+                        Belépés
+                    </a>
                 {% endif %}
             </div>
+
         </div>
+
     </div>
 </nav>
+
 <main class="container py-4">
+
     {% if messages %}
         {% for message in messages %}
-            <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} mb-3">{{ message }}</div>
+            <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} mb-3">
+                {{ message }}
+            </div>
         {% endfor %}
     {% endif %}
-    {% block content %}{% endblock %}
+
+    {% block content %}
+    {% endblock %}
 </main>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
 </body>
 </html>
