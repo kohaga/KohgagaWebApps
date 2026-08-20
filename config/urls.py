@@ -23,4 +23,5 @@ urlpatterns = [
     path("vocabulary/", include("vocabulary.urls")),
     path("", include("core.urls")),
     path("workouts/", include("workouts.urls")),
+    path("darts/", include("darts.urls")),
 ]

@@ -58,6 +58,7 @@ INSTALLED_APPS = [
     'core',
     'vocabulary',
     'workouts',
+    'darts',
 ]
 
 MIDDLEWARE = [
