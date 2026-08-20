@@ -1,9 +1,11 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}Új darts játék{% endblock %}
 
 {% block content %}
-<div class="mx-auto" style="max-width: 720px;">
+<link rel="stylesheet" href="{% static 'darts/darts.css' %}">
+<div class="darts-page mx-auto" style="max-width: 720px;">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h1 class="h3 mb-0">Új játék</h1>
         <a href="{% url 'darts:dashboard' %}" class="btn btn-outline-secondary">Vissza</a>
@@ -12,7 +14,7 @@
     <form method="post" class="card shadow-sm">
         {% csrf_token %}
         <div class="card-body">
-            <h2 class="h5 mb-3">Játékmód</h2>
+            <h2 class="h5 mb-3 dart-section-title">Játékmód</h2>
             <div class="row g-2 mb-4">
                 <div class="col-6">
                     <input class="btn-check" type="radio" name="game_type" id="game301" value="301" checked>
@@ -24,7 +26,7 @@
                 </div>
             </div>
 
-            <h2 class="h5 mb-3">Kiszálló</h2>
+            <h2 class="h5 mb-3 dart-section-title">Kiszálló</h2>
             <div class="row g-2 mb-4">
                 <div class="col-6">
                     <input class="btn-check" type="radio" name="checkout_mode" id="doubleOut" value="double" checked>
@@ -36,7 +38,7 @@
                 </div>
             </div>
 
-            <h2 class="h5 mb-3">Játékosok</h2>
+            <h2 class="h5 mb-3 dart-section-title">Játékosok</h2>
             <div class="list-group mb-4">
                 {% for player in players %}
                     <label class="list-group-item d-flex gap-3 align-items-center py-3">
