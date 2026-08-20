@@ -65,6 +65,43 @@ def get_checkout_suggestion(remaining_score, darts_left=3):
     return []
 
 
+def _one_dart_finish_options(remaining_score, checkout_mode):
+    options = []
+
+    if checkout_mode == Game.CheckoutMode.STRAIGHT:
+        if 1 <= remaining_score <= 20:
+            options.append(str(remaining_score))
+        elif remaining_score == 25:
+            options.append("25")
+        elif remaining_score == 50:
+            options.append("BULL")
+
+        if (
+            remaining_score % 2 == 0
+            and 1 <= remaining_score // 2 <= 20
+        ):
+            options.append(f"D{remaining_score // 2}")
+
+        if (
+            remaining_score % 3 == 0
+            and 1 <= remaining_score // 3 <= 20
+        ):
+            options.append(f"T{remaining_score // 3}")
+
+        return options[:3]
+
+    if remaining_score == 50:
+        return ["BULL"]
+
+    if (
+        remaining_score % 2 == 0
+        and 1 <= remaining_score // 2 <= 20
+    ):
+        return [f"D{remaining_score // 2}"]
+
+    return []
+
+
 def get_finish_suggestion(remaining_score, darts_left=3, checkout_mode="double"):
     try:
         remaining_score = int(remaining_score)
@@ -81,10 +118,38 @@ def get_finish_suggestion(remaining_score, darts_left=3, checkout_mode="double")
     return get_checkout_suggestion(remaining_score, darts_left)
 
 
+def get_finish_options(remaining_score, darts_left=3, checkout_mode="double"):
+    """Return up to three compact finish targets for the scoring screen."""
+    try:
+        remaining_score = int(remaining_score)
+        darts_left = int(darts_left)
+    except (TypeError, ValueError):
+        return []
+
+    if remaining_score <= 0 or darts_left < 1:
+        return []
+
+    immediate_finishes = _one_dart_finish_options(
+        remaining_score,
+        checkout_mode,
+    )
+    if immediate_finishes:
+        return immediate_finishes
+
+    return get_finish_suggestion(
+        remaining_score,
+        darts_left=darts_left,
+        checkout_mode=checkout_mode,
+    )[:3]
+
+
 def _find_straight_finish(remaining_score, darts_left):
-    for score, label in SCORING_DARTS:
-        if score == remaining_score:
-            return [label]
+    immediate_finishes = _one_dart_finish_options(
+        remaining_score,
+        Game.CheckoutMode.STRAIGHT,
+    )
+    if immediate_finishes:
+        return [immediate_finishes[0]]
 
     if darts_left >= 2:
         for first_score, first_label in SCORING_DARTS:
