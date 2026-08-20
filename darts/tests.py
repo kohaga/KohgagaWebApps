@@ -2,7 +2,12 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 
 from .models import Game, GamePlayer, Player
-from .services import get_checkout_suggestion, record_throw, undo_last_throw
+from .services import (
+    get_checkout_suggestion,
+    get_finish_suggestion,
+    record_throw,
+    undo_last_throw,
+)
 
 
 class DartsScoringTests(TestCase):
@@ -64,4 +69,24 @@ class DartsScoringTests(TestCase):
         self.assertEqual(
             get_checkout_suggestion(170, darts_left=3),
             ["T20", "T20", "BULL"],
+        )
+
+    def test_straight_out_21_with_one_dart_suggests_t7(self):
+        self.assertEqual(
+            get_finish_suggestion(
+                21,
+                darts_left=1,
+                checkout_mode=Game.CheckoutMode.STRAIGHT,
+            ),
+            ["T7"],
+        )
+
+    def test_double_out_21_with_one_dart_has_no_finish(self):
+        self.assertEqual(
+            get_finish_suggestion(
+                21,
+                darts_left=1,
+                checkout_mode=Game.CheckoutMode.DOUBLE,
+            ),
+            [],
         )
