@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+
+{% block title %}{{ game.game_type }} darts{% endblock %}
+
+{% block content %}
+<style>
+    .dart-score { font-size: clamp(2.25rem, 8vw, 4.5rem); line-height: 1; }
+    .dart-number-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: .5rem; }
+    .dart-number-btn { min-height: 54px; font-size: 1.15rem; font-weight: 600; }
+    .multiplier-active { box-shadow: 0 0 0 .2rem rgba(13,110,253,.25); }
+    @media (max-width: 575.98px) {
+        .dart-number-grid { gap: .35rem; }
+        .dart-number-btn { min-height: 48px; padding-left: .25rem; padding-right: .25rem; }
+    }
+</style>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h1 class="h4 mb-0">{{ game.game_type }} · {{ game.get_checkout_mode_display }}</h1>
+        <div class="small text-muted">{{ game.started_at|date:"Y.m.d. H:i" }}</div>
+    </div>
+    <a href="{% url 'darts:dashboard' %}" class="btn btn-outline-secondary btn-sm">Darts főoldal</a>
+</div>
+
+<div class="row g-2 mb-3">
+    {% for row in scoreboard_rows %}
+        <div class="col-6 col-lg-3">
+            <div class="card h-100 {% if current_game_player and current_game_player.id == row.game_player.id %}border-primary border-2{% endif %}">
+                <div class="card-body p-2 text-center">
+                    <div class="fw-semibold text-truncate">{{ row.game_player.player.name }}</div>
+                    <div class="display-6 fw-bold">{{ row.game_player.current_score }}</div>
+                    <div class="small text-muted text-truncate">
+                        {% if row.last_visit %}
+                            {% if row.last_visit.bust %}BUST{% else %}
+                                {% for dart in row.last_visit.throws.all %}{{ dart.display_value }}{% if not forloop.last %} · {% endif %}{% endfor %}
+                            {% endif %}
+                        {% else %}-{% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+
+{% if game.status == "finished" %}
+    <div class="card shadow-sm text-center mb-3">
+        <div class="card-body py-4">
+            <div class="text-muted">Győztes</div>
+            <div class="display-5 fw-bold mb-3">{{ game.winner.name }}</div>
+            <div class="d-flex gap-2 justify-content-center">
+                <a href="{% url 'darts:new_game' %}" class="btn btn-success">Új játék</a>
+                <form method="post" action="{% url 'darts:undo_dart' game.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-outline-danger">Utolsó dobás vissza</button>
+                </form>
+            </div>
+        </div>
+    </div>
+{% else %}
+    <div class="card shadow-sm mb-3">
+        <div class="card-body text-center py-3">
+            <div class="text-muted small">Következik</div>
+            <h2 class="h4 mb-2">{{ current_game_player.player.name }}</h2>
+            <div class="dart-score fw-bold mb-2">{{ current_game_player.current_score }}</div>
+
+            {% if checkout_suggestion %}
+                <div class="alert alert-success py-2 mb-2">
+                    <strong>Kiszálló:</strong>
+                    {% for dart in checkout_suggestion %}{{ dart }}{% if not forloop.last %} → {% endif %}{% endfor %}
+                </div>
+            {% endif %}
+
+            <div class="small text-muted">
+                Aktuális kör:
+                {% for dart in current_throws %}
+                    <strong>{{ dart.display_value }}</strong>{% if not forloop.last %} · {% endif %}
+                {% empty %}
+                    még nincs dobás
+                {% endfor %}
+                · {{ darts_left }} dart maradt
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <form id="dartForm" method="post" action="{% url 'darts:record_dart' game.id %}">
+                {% csrf_token %}
+                <input type="hidden" name="segment" id="segmentInput">
+                <input type="hidden" name="multiplier" id="multiplierInput" value="1">
+
+                <div class="d-flex gap-2 mb-3">
+                    <button type="button" class="btn btn-outline-primary flex-fill multiplier-btn" data-multiplier="2">DOUBLE</button>
+                    <button type="button" class="btn btn-outline-primary flex-fill multiplier-btn" data-multiplier="3">TRIPLE</button>
+                </div>
+
+                <div class="dart-number-grid mb-3">
+                    {% for number in number_buttons %}
+                        <button type="button" class="btn {% if number == 0 %}btn-outline-secondary{% else %}btn-outline-dark{% endif %} dart-number-btn segment-btn" data-segment="{{ number }}">
+                            {% if number == 0 %}MISS{% else %}{{ number }}{% endif %}
+                        </button>
+                    {% endfor %}
+                </div>
+
+                <div class="row g-2 mb-3">
+                    <div class="col-6 d-grid">
+                        <button type="button" class="btn btn-outline-success btn-lg bull-btn" data-segment="25" data-multiplier="1">25</button>
+                    </div>
+                    <div class="col-6 d-grid">
+                        <button type="button" class="btn btn-success btn-lg bull-btn" data-segment="25" data-multiplier="2">BULL 50</button>
+                    </div>
+                </div>
+            </form>
+
+            <form method="post" action="{% url 'darts:undo_dart' game.id %}" class="d-grid">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-outline-danger">UNDO – utolsó dobás</button>
+            </form>
+        </div>
+    </div>
+
+<script>
+(function () {
+    const form = document.getElementById("dartForm");
+    const segmentInput = document.getElementById("segmentInput");
+    const multiplierInput = document.getElementById("multiplierInput");
+    const multiplierButtons = document.querySelectorAll(".multiplier-btn");
+
+    function resetMultiplier() {
+        multiplierInput.value = "1";
+        multiplierButtons.forEach(button => button.classList.remove("multiplier-active", "btn-primary"));
+        multiplierButtons.forEach(button => button.classList.add("btn-outline-primary"));
+    }
+
+    multiplierButtons.forEach(button => {
+        button.addEventListener("click", function () {
+            const multiplier = this.dataset.multiplier;
+            const alreadyActive = multiplierInput.value === multiplier;
+            resetMultiplier();
+            if (!alreadyActive) {
+                multiplierInput.value = multiplier;
+                this.classList.remove("btn-outline-primary");
+                this.classList.add("btn-primary", "multiplier-active");
+            }
+        });
+    });
+
+    document.querySelectorAll(".segment-btn").forEach(button => {
+        button.addEventListener("click", function () {
+            segmentInput.value = this.dataset.segment;
+            if (segmentInput.value === "0") multiplierInput.value = "1";
+            form.submit();
+        });
+    });
+
+    document.querySelectorAll(".bull-btn").forEach(button => {
+        button.addEventListener("click", function () {
+            segmentInput.value = this.dataset.segment;
+            multiplierInput.value = this.dataset.multiplier;
+            form.submit();
+        });
+    });
+})();
+</script>
+{% endif %}
+{% endblock %}
