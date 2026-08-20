@@ -65,6 +65,49 @@ def get_checkout_suggestion(remaining_score, darts_left=3):
     return []
 
 
+def get_finish_suggestion(remaining_score, darts_left=3, checkout_mode="double"):
+    try:
+        remaining_score = int(remaining_score)
+        darts_left = int(darts_left)
+    except (TypeError, ValueError):
+        return []
+
+    if remaining_score <= 0 or darts_left < 1:
+        return []
+
+    if checkout_mode == Game.CheckoutMode.STRAIGHT:
+        return _find_straight_finish(remaining_score, darts_left)
+
+    return get_checkout_suggestion(remaining_score, darts_left)
+
+
+def _find_straight_finish(remaining_score, darts_left):
+    for score, label in SCORING_DARTS:
+        if score == remaining_score:
+            return [label]
+
+    if darts_left >= 2:
+        for first_score, first_label in SCORING_DARTS:
+            needed = remaining_score - first_score
+            for second_score, second_label in SCORING_DARTS:
+                if second_score == needed:
+                    return [first_label, second_label]
+
+    if darts_left >= 3:
+        for first_score, first_label in SCORING_DARTS:
+            remaining_after_first = remaining_score - first_score
+            if remaining_after_first <= 0:
+                continue
+
+            for second_score, second_label in SCORING_DARTS:
+                needed = remaining_after_first - second_score
+                for third_score, third_label in SCORING_DARTS:
+                    if third_score == needed:
+                        return [first_label, second_label, third_label]
+
+    return []
+
+
 def get_current_game_player(game):
     return game.game_players.select_related("player").get(
         player_order=game.current_player_order,
