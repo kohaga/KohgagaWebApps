@@ -8,6 +8,7 @@ from .models import (
     WorkoutSession,
     WorkoutSessionExercise,
 )
+from .services import generate_workout_for_user
 from .timed_blocks import apply_timed_muscle_gain_blocks, parse_block_minutes
 
 
@@ -115,3 +116,47 @@ class TimedBlockPlanningTests(TestCase):
             )
         )
         self.assertGreater(circuit.position, warmups.count())
+
+
+class MainWorkoutExerciseFilteringTests(TestCase):
+    def setUp(self):
+        self.user = get_user_model().objects.create_user(
+            username="main-filter-test",
+            password="test-password",
+        )
+        self.core = MuscleGroup.objects.create(name="Törzs")
+
+        for name, movement_pattern in [
+            ("Teszt core", Exercise.MovementPattern.CORE),
+            ("Teszt kar", Exercise.MovementPattern.ARMS),
+            ("Teszt nyomás", Exercise.MovementPattern.PUSH),
+            ("Teszt mobilitás", Exercise.MovementPattern.MOBILITY),
+            ("Teszt nyújtás", Exercise.MovementPattern.STRETCHING),
+        ]:
+            exercise = Exercise.objects.create(
+                name=name,
+                description=name,
+                movement_pattern=movement_pattern,
+            )
+            ExerciseMuscle.objects.create(
+                exercise=exercise,
+                muscle_group=self.core,
+                role=ExerciseMuscle.MuscleRole.PRIMARY,
+            )
+
+    def test_mobility_and_stretching_are_not_selected_for_main_block(self):
+        session = generate_workout_for_user(
+            user=self.user,
+            workout_profile="full_body",
+            training_goal=WorkoutSession.TrainingGoal.MUSCLE_GAIN,
+            circuit_exercise_count=3,
+        )
+
+        circuit_patterns = set(
+            session.session_exercises
+            .filter(block_type=WorkoutSessionExercise.BlockType.CIRCUIT)
+            .values_list("exercise__movement_pattern", flat=True)
+        )
+
+        self.assertNotIn(Exercise.MovementPattern.MOBILITY, circuit_patterns)
+        self.assertNotIn(Exercise.MovementPattern.STRETCHING, circuit_patterns)
