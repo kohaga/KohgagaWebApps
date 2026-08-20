@@ -4,6 +4,7 @@ from django.test import TestCase
 from .models import Game, GamePlayer, Player
 from .services import (
     get_checkout_suggestion,
+    get_finish_options,
     get_finish_suggestion,
     record_throw,
     undo_last_throw,
@@ -79,6 +80,26 @@ class DartsScoringTests(TestCase):
                 checkout_mode=Game.CheckoutMode.STRAIGHT,
             ),
             ["T7"],
+        )
+
+    def test_straight_out_18_with_one_dart_has_three_options(self):
+        self.assertEqual(
+            get_finish_options(
+                18,
+                darts_left=1,
+                checkout_mode=Game.CheckoutMode.STRAIGHT,
+            ),
+            ["18", "D9", "T6"],
+        )
+
+    def test_double_out_18_with_one_dart_only_has_d9(self):
+        self.assertEqual(
+            get_finish_options(
+                18,
+                darts_left=1,
+                checkout_mode=Game.CheckoutMode.DOUBLE,
+            ),
+            ["D9"],
         )
 
     def test_double_out_21_with_one_dart_has_no_finish(self):
