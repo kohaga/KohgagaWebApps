@@ -92,6 +92,13 @@ SUPPLEMENTARY_SELECTORS = [
 ]
 
 
+MAIN_WORKOUT_EXCLUDED_PATTERNS = [
+    Exercise.MovementPattern.CARDIO,
+    Exercise.MovementPattern.MOBILITY,
+    Exercise.MovementPattern.STRETCHING,
+]
+
+
 def get_workout_profile_choices():
     return [
         {
@@ -180,6 +187,7 @@ def generate_workout_for_user(
             excluded_exercise_ids=excluded_exercise_ids,
             recent_exercise_ids=recent_exercise_ids,
             already_selected_ids=selected_exercise_ids,
+            excluded_movement_patterns=MAIN_WORKOUT_EXCLUDED_PATTERNS,
         )
 
         if exercise:
@@ -334,13 +342,7 @@ def replace_session_exercise_for_user(user, session_exercise):
         Exercise.objects
         .filter(is_active=True)
         .exclude(id__in=excluded_exercise_ids)
-        .exclude(
-            movement_pattern__in=[
-                Exercise.MovementPattern.CARDIO,
-                Exercise.MovementPattern.MOBILITY,
-                Exercise.MovementPattern.STRETCHING,
-            ]
-        )
+        .exclude(movement_pattern__in=MAIN_WORKOUT_EXCLUDED_PATTERNS)
         .distinct()
     )
 
@@ -421,6 +423,7 @@ def _choose_replacement_exercise(queryset, recent_exercise_ids):
 
     return random.choice(exercises)
 
+
 def _clamp_int(value, min_value, max_value, default):
     try:
         value = int(value)
@@ -461,6 +464,7 @@ def _select_exercise_by_selector(
     excluded_exercise_ids,
     recent_exercise_ids,
     already_selected_ids,
+    excluded_movement_patterns=None,
 ):
     base_queryset = Exercise.objects.filter(is_active=True)
 
@@ -475,6 +479,11 @@ def _select_exercise_by_selector(
     if muscle_groups:
         base_queryset = base_queryset.filter(
             exercise_muscles__muscle_group__name__in=muscle_groups,
+        )
+
+    if excluded_movement_patterns:
+        base_queryset = base_queryset.exclude(
+            movement_pattern__in=excluded_movement_patterns,
         )
 
     base_queryset = (
@@ -510,6 +519,7 @@ def _select_supplementary_exercise(
             excluded_exercise_ids=excluded_exercise_ids,
             recent_exercise_ids=recent_exercise_ids,
             already_selected_ids=already_selected_ids,
+            excluded_movement_patterns=MAIN_WORKOUT_EXCLUDED_PATTERNS,
         )
 
         if exercise:
@@ -520,13 +530,7 @@ def _select_supplementary_exercise(
         .filter(is_active=True)
         .exclude(id__in=excluded_exercise_ids)
         .exclude(id__in=already_selected_ids)
-        .exclude(
-            movement_pattern__in=[
-                Exercise.MovementPattern.CARDIO,
-                Exercise.MovementPattern.MOBILITY,
-                Exercise.MovementPattern.STRETCHING,
-            ]
-        )
+        .exclude(movement_pattern__in=MAIN_WORKOUT_EXCLUDED_PATTERNS)
         .distinct()
     )
 
@@ -575,6 +579,7 @@ def _create_session_exercise(
         target_weight_kg=target_weight,
         rest_seconds=rest_seconds,
     )
+
 
 def _generate_aerobic_video_workout(
     user,
