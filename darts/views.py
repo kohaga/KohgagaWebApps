@@ -186,21 +186,6 @@ def game_detail(request, game_id):
         .order_by("player_order")
     )
 
-    scoreboard_rows = []
-    for game_player in game_players:
-        last_visit = (
-            game_player.visits
-            .filter(is_complete=True)
-            .order_by("-visit_number")
-            .first()
-        )
-        scoreboard_rows.append(
-            {
-                "game_player": game_player,
-                "last_visit": last_visit,
-            }
-        )
-
     current_game_player = None
     current_visit = None
     current_throws = []
@@ -226,6 +211,45 @@ def game_detail(request, game_id):
             checkout_mode=game.checkout_mode,
         )
 
+    scoreboard_rows = []
+    for game_player in game_players:
+        is_current = bool(
+            current_game_player
+            and current_game_player.id == game_player.id
+        )
+
+        if is_current and current_visit:
+            visit_to_show = current_visit
+        else:
+            visit_to_show = (
+                game_player.visits
+                .filter(is_complete=True)
+                .prefetch_related("throws")
+                .order_by("-visit_number")
+                .first()
+            )
+
+        visit_throws = list(visit_to_show.throws.all()) if visit_to_show else []
+        throw_labels = [dart.display_value for dart in visit_throws]
+        throw_total = (
+            0
+            if visit_to_show and visit_to_show.bust
+            else sum(dart.score for dart in visit_throws)
+        )
+
+        while len(throw_labels) < 3:
+            throw_labels.append("-")
+
+        scoreboard_rows.append(
+            {
+                "game_player": game_player,
+                "is_current": is_current,
+                "throw_labels": throw_labels[:3],
+                "throw_total": throw_total,
+                "is_bust": bool(visit_to_show and visit_to_show.bust),
+            }
+        )
+
     return render(
         request,
         "darts/game.html",
@@ -233,11 +257,8 @@ def game_detail(request, game_id):
             "game": game,
             "scoreboard_rows": scoreboard_rows,
             "current_game_player": current_game_player,
-            "current_visit": current_visit,
-            "current_throws": current_throws,
-            "darts_left": darts_left,
             "finish_options": finish_options,
-            "number_buttons": range(0, 21),
+            "number_buttons": range(1, 21),
         },
     )
 
