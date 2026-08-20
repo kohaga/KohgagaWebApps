@@ -4,13 +4,39 @@
 
 {% block content %}
 <style>
-    .dart-score { font-size: clamp(2.25rem, 8vw, 4.5rem); line-height: 1; }
-    .dart-number-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: .5rem; }
-    .dart-number-btn { min-height: 54px; font-size: 1.15rem; font-weight: 600; }
-    .multiplier-active { box-shadow: 0 0 0 .2rem rgba(13,110,253,.25); }
+    .dart-number-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: .55rem;
+    }
+    .dart-number-btn {
+        min-height: 58px;
+        font-size: 1.25rem;
+        font-weight: 600;
+    }
+    .dart-multiplier-grid,
+    .dart-special-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: .5rem;
+    }
+    .dart-multiplier-btn,
+    .dart-special-btn {
+        min-height: 48px;
+        font-weight: 600;
+    }
+    .multiplier-active {
+        box-shadow: 0 0 0 .2rem rgba(13, 110, 253, .2);
+    }
     @media (max-width: 575.98px) {
-        .dart-number-grid { gap: .35rem; }
-        .dart-number-btn { min-height: 48px; padding-left: .25rem; padding-right: .25rem; }
+        .dart-number-grid { gap: .4rem; }
+        .dart-number-btn {
+            min-height: 54px;
+            padding-left: .25rem;
+            padding-right: .25rem;
+        }
+        .dart-multiplier-grid,
+        .dart-special-grid { gap: .4rem; }
     }
 </style>
 
@@ -57,66 +83,60 @@
         </div>
     </div>
 {% else %}
-    <div class="card shadow-sm mb-3">
-        <div class="card-body text-center py-3">
-            <div class="text-muted small">Következik</div>
-            <h2 class="h4 mb-2">{{ current_game_player.player.name }}</h2>
-            <div class="dart-score fw-bold mb-2">{{ current_game_player.current_score }}</div>
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center gap-2 mb-1">
+                <div class="text-truncate">
+                    <span class="text-muted small">Következik:</span>
+                    <strong>{{ current_game_player.player.name }}</strong>
+                </div>
+                <div class="small text-muted text-nowrap">{{ darts_left }} dart maradt</div>
+            </div>
 
-            <div class="small text-muted">
+            <div class="small text-muted mb-2">
                 Aktuális kör:
                 {% for dart in current_throws %}
-                    <strong>{{ dart.display_value }}</strong>{% if not forloop.last %} · {% endif %}
+                    <strong class="text-body">{{ dart.display_value }}</strong>{% if not forloop.last %} · {% endif %}
                 {% empty %}
                     még nincs dobás
                 {% endfor %}
-                · {{ darts_left }} dart maradt
             </div>
-        </div>
-    </div>
 
-    <div class="card shadow-sm mb-3">
-        <div class="card-body py-2 px-3">
-            <div class="small text-muted">Javaslat</div>
             {% if finish_suggestion %}
-                <div class="fw-semibold">
-                    Kiszálló: {{ finish_suggestion|join:" → " }}
+                <div class="alert alert-success py-2 px-3 mb-3">
+                    <strong>Kiszálló:</strong> {{ finish_suggestion|join:" → " }}
                 </div>
             {% else %}
-                <div class="text-muted">
+                <div class="small text-muted mb-3">
                     Nincs kiszálló javaslat {{ darts_left }} dartból.
                 </div>
             {% endif %}
-        </div>
-    </div>
 
-    <div class="card shadow-sm">
-        <div class="card-body">
             <form id="dartForm" method="post" action="{% url 'darts:record_dart' game.id %}">
                 {% csrf_token %}
                 <input type="hidden" name="segment" id="segmentInput">
                 <input type="hidden" name="multiplier" id="multiplierInput" value="1">
 
-                <div class="d-flex gap-2 mb-3">
-                    <button type="button" class="btn btn-outline-primary flex-fill multiplier-btn" data-multiplier="2">DOUBLE</button>
-                    <button type="button" class="btn btn-outline-primary flex-fill multiplier-btn" data-multiplier="3">TRIPLE</button>
+                <div class="dart-multiplier-grid mb-3" role="group" aria-label="Szorzó">
+                    <button type="button" class="btn btn-primary dart-multiplier-btn multiplier-btn multiplier-active" data-multiplier="1">SINGLE</button>
+                    <button type="button" class="btn btn-outline-primary dart-multiplier-btn multiplier-btn" data-multiplier="2">DOUBLE</button>
+                    <button type="button" class="btn btn-outline-primary dart-multiplier-btn multiplier-btn" data-multiplier="3">TRIPLE</button>
                 </div>
 
                 <div class="dart-number-grid mb-3">
                     {% for number in number_buttons %}
-                        <button type="button" class="btn {% if number == 0 %}btn-outline-secondary{% else %}btn-outline-dark{% endif %} dart-number-btn segment-btn" data-segment="{{ number }}">
-                            {% if number == 0 %}MISS{% else %}{{ number }}{% endif %}
-                        </button>
+                        {% if number != 0 %}
+                            <button type="button" class="btn btn-outline-dark dart-number-btn segment-btn" data-segment="{{ number }}">
+                                {{ number }}
+                            </button>
+                        {% endif %}
                     {% endfor %}
                 </div>
 
-                <div class="row g-2 mb-3">
-                    <div class="col-6 d-grid">
-                        <button type="button" class="btn btn-outline-success btn-lg bull-btn" data-segment="25" data-multiplier="1">25</button>
-                    </div>
-                    <div class="col-6 d-grid">
-                        <button type="button" class="btn btn-success btn-lg bull-btn" data-segment="25" data-multiplier="2">BULL 50</button>
-                    </div>
+                <div class="dart-special-grid mb-3">
+                    <button type="button" class="btn btn-outline-secondary dart-special-btn direct-dart-btn" data-segment="0" data-multiplier="1">MISS</button>
+                    <button type="button" class="btn btn-outline-success dart-special-btn direct-dart-btn" data-segment="25" data-multiplier="1">25</button>
+                    <button type="button" class="btn btn-success dart-special-btn direct-dart-btn" data-segment="25" data-multiplier="2">BULL 50</button>
                 </div>
             </form>
 
@@ -134,34 +154,30 @@
     const multiplierInput = document.getElementById("multiplierInput");
     const multiplierButtons = document.querySelectorAll(".multiplier-btn");
 
-    function resetMultiplier() {
-        multiplierInput.value = "1";
-        multiplierButtons.forEach(button => button.classList.remove("multiplier-active", "btn-primary"));
-        multiplierButtons.forEach(button => button.classList.add("btn-outline-primary"));
+    function selectMultiplier(multiplier) {
+        multiplierInput.value = multiplier;
+        multiplierButtons.forEach(button => {
+            const isActive = button.dataset.multiplier === multiplier;
+            button.classList.toggle("btn-primary", isActive);
+            button.classList.toggle("btn-outline-primary", !isActive);
+            button.classList.toggle("multiplier-active", isActive);
+        });
     }
 
     multiplierButtons.forEach(button => {
         button.addEventListener("click", function () {
-            const multiplier = this.dataset.multiplier;
-            const alreadyActive = multiplierInput.value === multiplier;
-            resetMultiplier();
-            if (!alreadyActive) {
-                multiplierInput.value = multiplier;
-                this.classList.remove("btn-outline-primary");
-                this.classList.add("btn-primary", "multiplier-active");
-            }
+            selectMultiplier(this.dataset.multiplier);
         });
     });
 
     document.querySelectorAll(".segment-btn").forEach(button => {
         button.addEventListener("click", function () {
             segmentInput.value = this.dataset.segment;
-            if (segmentInput.value === "0") multiplierInput.value = "1";
             form.submit();
         });
     });
 
-    document.querySelectorAll(".bull-btn").forEach(button => {
+    document.querySelectorAll(".direct-dart-btn").forEach(button => {
         button.addEventListener("click", function () {
             segmentInput.value = this.dataset.segment;
             multiplierInput.value = this.dataset.multiplier;
