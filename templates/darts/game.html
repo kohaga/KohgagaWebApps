@@ -63,13 +63,6 @@
             <h2 class="h4 mb-2">{{ current_game_player.player.name }}</h2>
             <div class="dart-score fw-bold mb-2">{{ current_game_player.current_score }}</div>
 
-            {% if checkout_suggestion %}
-                <div class="alert alert-success py-2 mb-2">
-                    <strong>Kiszálló:</strong>
-                    {% for dart in checkout_suggestion %}{{ dart }}{% if not forloop.last %} → {% endif %}{% endfor %}
-                </div>
-            {% endif %}
-
             <div class="small text-muted">
                 Aktuális kör:
                 {% for dart in current_throws %}
@@ -79,6 +72,21 @@
                 {% endfor %}
                 · {{ darts_left }} dart maradt
             </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-3">
+        <div class="card-body py-2 px-3">
+            <div class="small text-muted">Javaslat</div>
+            {% if finish_suggestion %}
+                <div class="fw-semibold">
+                    Kiszálló: {{ finish_suggestion|join:" → " }}
+                </div>
+            {% else %}
+                <div class="text-muted">
+                    Nincs kiszálló javaslat {{ darts_left }} dartból.
+                </div>
+            {% endif %}
         </div>
     </div>
 
