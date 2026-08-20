@@ -5,8 +5,8 @@ from django.shortcuts import get_object_or_404, redirect, render
 
 from .models import Game, GamePlayer, Player
 from .services import (
-    get_checkout_suggestion,
     get_current_game_player,
+    get_finish_suggestion,
     get_player_stats,
     record_throw,
     undo_last_throw,
@@ -204,7 +204,7 @@ def game_detail(request, game_id):
     current_game_player = None
     current_visit = None
     current_throws = []
-    checkout_suggestion = []
+    finish_suggestion = []
     darts_left = 3
 
     if game.status == Game.Status.ACTIVE:
@@ -220,11 +220,11 @@ def game_detail(request, game_id):
             current_throws = list(current_visit.throws.all())
             darts_left = 3 - len(current_throws)
 
-        if game.checkout_mode == Game.CheckoutMode.DOUBLE:
-            checkout_suggestion = get_checkout_suggestion(
-                current_game_player.current_score,
-                darts_left=darts_left,
-            )
+        finish_suggestion = get_finish_suggestion(
+            current_game_player.current_score,
+            darts_left=darts_left,
+            checkout_mode=game.checkout_mode,
+        )
 
     return render(
         request,
@@ -236,7 +236,7 @@ def game_detail(request, game_id):
             "current_visit": current_visit,
             "current_throws": current_throws,
             "darts_left": darts_left,
-            "checkout_suggestion": checkout_suggestion,
+            "finish_suggestion": finish_suggestion,
             "number_buttons": range(0, 21),
         },
     )
