@@ -4,9 +4,72 @@
 
 {% block content %}
 <style>
-    .dart-player-card .card-body { padding: .45rem .65rem; }
-    .dart-player-score { font-size: 1.65rem; line-height: 1; }
-    .dart-player-throws { font-size: .78rem; }
+    .dart-player-card .card-body { padding: .45rem .6rem; }
+    .dart-player-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: .45rem;
+        margin-bottom: .35rem;
+    }
+    .dart-player-name {
+        min-width: 0;
+        font-size: .95rem;
+        font-weight: 600;
+        line-height: 1.1;
+    }
+    .dart-player-score {
+        flex: 0 0 auto;
+        font-size: 1.7rem;
+        font-weight: 700;
+        line-height: 1;
+    }
+    .dart-visit-line {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: .35rem;
+        min-height: 1.65rem;
+    }
+    .dart-visit-throws {
+        display: flex;
+        align-items: center;
+        gap: .2rem;
+        min-width: 0;
+        overflow: hidden;
+    }
+    .dart-throw-slot {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 1.7rem;
+        height: 1.5rem;
+        padding: 0 .25rem;
+        border: 1px solid var(--bs-border-color);
+        border-radius: .3rem;
+        background: var(--bs-body-bg);
+        color: var(--bs-secondary-color);
+        font-size: .72rem;
+        font-weight: 600;
+        line-height: 1;
+        white-space: nowrap;
+    }
+    .dart-throw-slot-empty {
+        background: var(--bs-tertiary-bg);
+        color: var(--bs-secondary-color);
+        border-style: dashed;
+        opacity: .7;
+    }
+    .dart-visit-total {
+        flex: 0 0 auto;
+        min-width: 1.8rem;
+        margin-left: auto;
+        text-align: right;
+        font-size: .9rem;
+        font-weight: 700;
+        color: var(--bs-primary);
+        white-space: nowrap;
+    }
     .dart-input-card .card-body { padding: .65rem; }
     .dart-number-grid {
         display: grid;
@@ -34,10 +97,14 @@
     }
     .finish-grid {
         display: flex;
+        justify-content: center;
+        align-items: center;
         flex-wrap: wrap;
         gap: .35rem;
+        text-align: center;
     }
     .finish-box {
+        min-width: 3rem;
         border: 1px solid var(--bs-success-border-subtle);
         background: var(--bs-success-bg-subtle);
         color: var(--bs-success-text-emphasis);
@@ -45,13 +112,18 @@
         padding: .28rem .55rem;
         font-weight: 600;
         font-size: .9rem;
+        text-align: center;
     }
     .multiplier-active { box-shadow: 0 0 0 .15rem rgba(13, 110, 253, .18); }
     @media (max-width: 575.98px) {
         .darts-header { margin-bottom: .55rem !important; }
         .darts-scoreboard { margin-bottom: .55rem !important; }
-        .dart-player-card .card-body { padding: .38rem .5rem; }
-        .dart-player-score { font-size: 1.5rem; }
+        .dart-player-card .card-body { padding: .38rem .45rem; }
+        .dart-player-score { font-size: 1.55rem; }
+        .dart-throw-slot {
+            min-width: 1.55rem;
+            padding: 0 .18rem;
+        }
         .dart-number-btn { min-height: 40px; }
     }
 </style>
@@ -69,15 +141,24 @@
         <div class="col-6 col-lg-3">
             <div class="card dart-player-card h-100 {% if row.is_current %}border-primary border-2{% endif %}">
                 <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center gap-2">
-                        <div class="fw-semibold text-truncate">{{ row.game_player.player.name }}</div>
-                        <div class="dart-player-score fw-bold">{{ row.game_player.current_score }}</div>
+                    <div class="dart-player-head">
+                        <div class="dart-player-name text-truncate">{{ row.game_player.player.name }}</div>
+                        <div class="dart-player-score">{{ row.game_player.current_score }}</div>
                     </div>
-                    <div class="dart-player-throws text-muted text-truncate">
+
+                    <div class="dart-visit-line">
                         {% if row.is_bust %}
-                            BUST = 0
+                            <div class="dart-visit-throws">
+                                <span class="text-danger fw-semibold small">BUST</span>
+                            </div>
+                            <div class="dart-visit-total text-danger">0</div>
                         {% else %}
-                            {{ row.throw_labels.0 }} · {{ row.throw_labels.1 }} · {{ row.throw_labels.2 }} = {{ row.throw_total }}
+                            <div class="dart-visit-throws">
+                                {% for label in row.throw_labels %}
+                                    <span class="dart-throw-slot {% if row.is_current and label == '-' %}dart-throw-slot-empty{% endif %}">{{ label }}</span>
+                                {% endfor %}
+                            </div>
+                            <div class="dart-visit-total">{{ row.throw_total }}</div>
                         {% endif %}
                     </div>
                 </div>
