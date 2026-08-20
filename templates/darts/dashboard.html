@@ -1,8 +1,11 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}Darts | KOHAGA Web Apps{% endblock %}
 
 {% block content %}
+<link rel="stylesheet" href="{% static 'darts/darts.css' %}">
+<div class="darts-page">
 <div class="d-flex justify-content-between align-items-center mb-3">
     <div>
         <h1 class="h3 mb-1">Darts</h1>
@@ -13,7 +16,7 @@
 
 <div class="card shadow-sm mb-4">
     <div class="card-body">
-        <h2 class="h5">Játékos hozzáadása</h2>
+        <h2 class="h5 dart-section-title">Játékos hozzáadása</h2>
         <form method="post" action="{% url 'darts:add_player' %}" class="row g-2">
             {% csrf_token %}
             <div class="col-8 col-md-10">
@@ -26,11 +29,11 @@
     </div>
 </div>
 
-<h2 class="h5 mb-3">Játékosok</h2>
+<h2 class="h5 mb-3 dart-section-title">Játékosok</h2>
 <div class="row g-3 mb-4">
     {% for row in player_rows %}
         <div class="col-12 col-md-6 col-lg-4">
-            <div class="card shadow-sm h-100">
+            <div class="card shadow-sm h-100 dart-stat-card">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-start">
                         <h3 class="h5 mb-3">{{ row.player.name }}</h3>
@@ -61,7 +64,7 @@
 </div>
 
 {% if recent_games %}
-<h2 class="h5 mb-3">Legutóbbi játékok</h2>
+<h2 class="h5 mb-3 dart-section-title">Legutóbbi játékok</h2>
 <div class="card shadow-sm">
     <div class="list-group list-group-flush">
         {% for game in recent_games %}
@@ -76,4 +79,5 @@
     </div>
 </div>
 {% endif %}
+</div>
 {% endblock %}
