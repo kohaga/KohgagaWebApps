@@ -1,14 +1,24 @@
-const CACHE_NAME = "kohaga-pwa-v1";
+const CACHE_NAME = "kohaga-pwa-v2";
 const STATIC_ASSETS = [
-  "/static/app.css",
-  "/static/manifest.webmanifest",
   "/static/icons/icon-192.png",
   "/static/icons/icon-512.png"
 ];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(STATIC_ASSETS))
+    caches.open(CACHE_NAME).then((cache) =>
+      Promise.all(
+        STATIC_ASSETS.map((asset) =>
+          fetch(asset)
+            .then((response) => {
+              if (response.ok) {
+                return cache.put(asset, response);
+              }
+            })
+            .catch(() => undefined)
+        )
+      )
+    )
   );
   self.skipWaiting();
 });
