@@ -10,6 +10,15 @@ urlpatterns = [
     path("", views.home_view, name="home"),
 
     path(
+        "manifest.webmanifest",
+        TemplateView.as_view(
+            template_name="manifest.webmanifest",
+            content_type="application/manifest+json",
+        ),
+        name="web_manifest",
+    ),
+
+    path(
         "service-worker.js",
         TemplateView.as_view(
             template_name="service-worker.js",
