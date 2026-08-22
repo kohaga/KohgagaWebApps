@@ -3,10 +3,33 @@ from django.core.exceptions import ValidationError
 from django.db import models
 
 
+class DartsGroup(models.Model):
+    name = models.CharField(max_length=80, unique=True)
+    members = models.ManyToManyField(
+        settings.AUTH_USER_MODEL,
+        related_name="darts_groups",
+        blank=True,
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["name"]
+
+    def __str__(self):
+        return self.name
+
+
 class Player(models.Model):
+    group = models.ForeignKey(
+        DartsGroup,
+        on_delete=models.CASCADE,
+        related_name="players",
+    )
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
         related_name="darts_players",
     )
     name = models.CharField(max_length=50)
@@ -15,7 +38,7 @@ class Player(models.Model):
 
     class Meta:
         ordering = ["name"]
-        unique_together = [("created_by", "name")]
+        unique_together = [("group", "name")]
 
     def __str__(self):
         return self.name
@@ -34,9 +57,16 @@ class Game(models.Model):
         ACTIVE = "active", "Folyamatban"
         FINISHED = "finished", "Lezárva"
 
+    group = models.ForeignKey(
+        DartsGroup,
+        on_delete=models.CASCADE,
+        related_name="games",
+    )
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
         related_name="darts_games",
     )
     game_type = models.CharField(
