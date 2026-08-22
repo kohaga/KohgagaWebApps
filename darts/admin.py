@@ -1,13 +1,20 @@
 from django.contrib import admin
 
-from .models import DartThrow, Game, GamePlayer, Player, Visit
+from .models import DartThrow, DartsGroup, Game, GamePlayer, Player, Visit
+
+
+@admin.register(DartsGroup)
+class DartsGroupAdmin(admin.ModelAdmin):
+    list_display = ["name", "created_at"]
+    search_fields = ["name", "members__username"]
+    filter_horizontal = ["members"]
 
 
 @admin.register(Player)
 class PlayerAdmin(admin.ModelAdmin):
-    list_display = ["name", "created_by", "active", "created_at"]
-    list_filter = ["active"]
-    search_fields = ["name", "created_by__username"]
+    list_display = ["name", "group", "created_by", "active", "created_at"]
+    list_filter = ["group", "active"]
+    search_fields = ["name", "created_by__username", "group__name"]
 
 
 class GamePlayerInline(admin.TabularInline):
@@ -22,11 +29,12 @@ class GameAdmin(admin.ModelAdmin):
         "checkout_mode",
         "status",
         "winner",
+        "group",
         "created_by",
         "started_at",
         "finished_at",
     ]
-    list_filter = ["game_type", "checkout_mode", "status"]
+    list_filter = ["group", "game_type", "checkout_mode", "status"]
     inlines = [GamePlayerInline]
 
 
