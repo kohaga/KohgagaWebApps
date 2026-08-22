@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.shortcuts import get_object_or_404, redirect, render
 
+from .access import get_current_darts_group
 from .models import Game, GamePlayer, Player
 from .services import (
     get_current_game_player,
@@ -15,8 +16,9 @@ from .services import (
 
 @login_required
 def dashboard(request):
+    group = get_current_darts_group(request.user)
     players = Player.objects.filter(
-        created_by=request.user,
+        group=group,
         active=True,
     ).order_by("name")
 
@@ -30,8 +32,8 @@ def dashboard(request):
 
     recent_games = (
         Game.objects
-        .filter(created_by=request.user)
-        .select_related("winner")
+        .filter(group=group)
+        .select_related("winner", "created_by")
         .prefetch_related("game_players__player")
         .order_by("-started_at")[:5]
     )
@@ -51,15 +53,19 @@ def add_player(request):
     if request.method != "POST":
         return redirect("darts:dashboard")
 
+    group = get_current_darts_group(request.user)
     name = request.POST.get("name", "").strip()
     if not name:
         messages.error(request, "Add meg a játékos nevét.")
         return redirect("darts:dashboard")
 
     player, created = Player.objects.get_or_create(
-        created_by=request.user,
+        group=group,
         name=name,
-        defaults={"active": True},
+        defaults={
+            "active": True,
+            "created_by": request.user,
+        },
     )
 
     if not created and not player.active:
@@ -77,17 +83,18 @@ def add_player(request):
 
 @login_required
 def player_detail(request, player_id):
+    group = get_current_darts_group(request.user)
     player = get_object_or_404(
         Player,
         id=player_id,
-        created_by=request.user,
+        group=group,
     )
     stats = get_player_stats(player)
     recent_entries = (
         GamePlayer.objects
         .filter(
             player=player,
-            game__created_by=request.user,
+            game__group=group,
             game__status=Game.Status.FINISHED,
         )
         .select_related("game", "game__winner")
@@ -107,9 +114,10 @@ def player_detail(request, player_id):
 
 @login_required
 def new_game(request):
+    group = get_current_darts_group(request.user)
     players = list(
         Player.objects
-        .filter(created_by=request.user, active=True)
+        .filter(group=group, active=True)
         .order_by("name")
     )
 
@@ -147,6 +155,7 @@ def new_game(request):
 
         with transaction.atomic():
             game = Game.objects.create(
+                group=group,
                 created_by=request.user,
                 game_type=game_type,
                 checkout_mode=checkout_mode,
@@ -173,10 +182,11 @@ def new_game(request):
 
 @login_required
 def game_detail(request, game_id):
+    group = get_current_darts_group(request.user)
     game = get_object_or_404(
         Game.objects.select_related("winner"),
         id=game_id,
-        created_by=request.user,
+        group=group,
     )
 
     game_players = list(
@@ -268,10 +278,11 @@ def record_dart(request, game_id):
     if request.method != "POST":
         return redirect("darts:game", game_id=game_id)
 
+    group = get_current_darts_group(request.user)
     game = get_object_or_404(
         Game,
         id=game_id,
-        created_by=request.user,
+        group=group,
     )
 
     try:
@@ -291,10 +302,11 @@ def undo_dart(request, game_id):
     if request.method != "POST":
         return redirect("darts:game", game_id=game_id)
 
+    group = get_current_darts_group(request.user)
     game = get_object_or_404(
         Game,
         id=game_id,
-        created_by=request.user,
+        group=group,
     )
 
     try:

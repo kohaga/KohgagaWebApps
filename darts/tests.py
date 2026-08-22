@@ -1,7 +1,8 @@
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 
-from .models import Game, GamePlayer, Player
+from .access import get_current_darts_group
+from .models import DartsGroup, Game, GamePlayer, Player
 from .services import (
     get_checkout_suggestion,
     get_finish_options,
@@ -17,11 +18,15 @@ class DartsScoringTests(TestCase):
             username="darts-test",
             password="test-password",
         )
+        self.group = DartsGroup.objects.create(name="Teszt család")
+        self.group.members.add(self.user)
         self.player = Player.objects.create(
+            group=self.group,
             created_by=self.user,
             name="Teszt játékos",
         )
         self.game = Game.objects.create(
+            group=self.group,
             created_by=self.user,
             game_type=Game.GameType.GAME_301,
             checkout_mode=Game.CheckoutMode.DOUBLE,
@@ -111,3 +116,35 @@ class DartsScoringTests(TestCase):
             ),
             [],
         )
+
+
+class DartsGroupTests(TestCase):
+    def test_users_without_group_join_same_default_group(self):
+        user_model = get_user_model()
+        first_user = user_model.objects.create_user(username="first")
+        second_user = user_model.objects.create_user(username="second")
+
+        first_group = get_current_darts_group(first_user)
+        second_group = get_current_darts_group(second_user)
+
+        self.assertEqual(first_group, second_group)
+        self.assertTrue(first_group.members.filter(pk=first_user.pk).exists())
+        self.assertTrue(first_group.members.filter(pk=second_user.pk).exists())
+
+    def test_player_name_is_unique_within_group(self):
+        user = get_user_model().objects.create_user(username="owner")
+        first_group = DartsGroup.objects.create(name="Első")
+        second_group = DartsGroup.objects.create(name="Második")
+
+        Player.objects.create(
+            group=first_group,
+            created_by=user,
+            name="Apa",
+        )
+        Player.objects.create(
+            group=second_group,
+            created_by=user,
+            name="Apa",
+        )
+
+        self.assertEqual(Player.objects.filter(name="Apa").count(), 2)
