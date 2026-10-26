@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Blog | KOHAGA{% endblock %}
+{% block content %}
+<div class="mb-4"><h1 class="display-6 fw-bold">KOHAGA Blog</h1><p class="text-muted">SAP, automatizálás, Python és egyéb projektek.</p></div>
+<form method="get" class="row g-2 mb-4">
+  <div class="col-sm-6"><input class="form-control" name="q" value="{{ query }}" placeholder="Keresés a bejegyzésekben" aria-label="Keresés"></div>
+  <div class="col-sm-4"><select name="category" class="form-select" aria-label="Kategória"><option value="">Minden kategória</option>{% for c in categories %}<option value="{{ c.slug }}" {% if selected_category == c.slug %}selected{% endif %}>{{ c.name }}</option>{% endfor %}</select></div>
+  <div class="col-sm-2"><button class="btn btn-dark w-100">Szűrés</button></div>
+</form>
+<div class="row g-4">{% for post in page %}
+  <div class="col-md-6 col-lg-4"><article class="card h-100 shadow-sm overflow-hidden">
+    {% if post.featured_image_url %}<img src="{{ post.featured_image_url }}" class="card-img-top" alt="" loading="lazy" style="height:190px;object-fit:cover">{% endif %}
+    <div class="card-body d-flex flex-column"><div class="small text-muted mb-2">{{ post.published_at|date:"Y. m. d." }}{% if post.category %} · {{ post.category.name }}{% endif %}</div>
+      <h2 class="h5"><a class="text-decoration-none text-dark" href="{{ post.get_absolute_url }}">{{ post.title }}</a></h2>
+      <p class="text-muted">{{ post.excerpt|default:post.content|striptags|truncatechars:180 }}</p>
+      <a class="mt-auto stretched-link" href="{{ post.get_absolute_url }}">Tovább olvasom</a>
+    </div></article></div>
+{% empty %}<p class="text-muted">Még nincs publikált, a szűrésnek megfelelő bejegyzés.</p>{% endfor %}</div>
+{% if page.has_other_pages %}<nav class="mt-4" aria-label="Lapozás"><div class="d-flex gap-3 align-items-center">{% if page.has_previous %}<a href="?page={{ page.previous_page_number }}&category={{ selected_category|urlencode }}&q={{ query|urlencode }}">Előző</a>{% endif %}<span>{{ page.number }} / {{ page.paginator.num_pages }}</span>{% if page.has_next %}<a href="?page={{ page.next_page_number }}&category={{ selected_category|urlencode }}&q={{ query|urlencode }}">Következő</a>{% endif %}</div></nav>{% endif %}
+{% endblock %}
