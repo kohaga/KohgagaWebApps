@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}{{ post.title }} | KOHAGA Blog{% endblock %}
+{% load static %}
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/blog.css' %}">
+<article class="mx-auto" style="max-width:850px">
+  <p><a href="{% url 'blog:index' %}" class="text-decoration-none">← Vissza a bloghoz</a></p>
+  <div class="text-muted small">{{ post.published_at|date:"Y. m. d." }}{% if post.category %} · {{ post.category.name }}{% endif %}</div>
+  <h1 class="display-6 fw-bold my-3">{{ post.title }}</h1>
+  {% if post.excerpt %}<p class="lead text-muted">{{ post.excerpt }}</p>{% endif %}
+  {% if post.featured_image_url %}<img class="img-fluid rounded mb-4 w-100" alt="" src="{{ post.featured_image_url }}">{% endif %}
+  <div class="blog-content lh-lg" style="overflow-wrap:anywhere">{{ post.content|safe }}</div>
+</article>
+<style>.blog-content img{max-width:100%;height:auto}.blog-content iframe{max-width:100%}.blog-content pre{max-width:100%;overflow-x:auto}.blog-content table{display:block;max-width:100%;overflow-x:auto}</style>
+{% endblock %}

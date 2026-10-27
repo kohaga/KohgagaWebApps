@@ -59,6 +59,7 @@ INSTALLED_APPS = [
     'vocabulary',
     'workouts',
     'darts',
+    'blog',
 ]
 
 MIDDLEWARE = [

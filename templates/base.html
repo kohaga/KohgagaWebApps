@@ -54,9 +54,10 @@
                     <a class="nav-link" href="{% url 'darts:dashboard' %}">
                         Darts
                     </a>
+                    <a class="nav-link" href="{% url 'blog:index' %}">Blog</a>
                 </div>
             {% else %}
-                <div class="me-auto"></div>
+                <div class="navbar-nav me-auto"><a class="nav-link" href="{% url 'blog:index' %}">Blog</a></div>
             {% endif %}
 
             <div class="d-flex align-items-center gap-2 mt-3 mt-lg-0">
